@@ -15,7 +15,7 @@ def mean(data, w=None, axis=0):
     if data.shape != w.shape:
         raise ValueError('Input dimensions do not match:', data.shape, alpha.shape)
 
-    r = w * np.exp(1j*data).sum(axis=axis)
+    r = (w * np.exp(1j*data)).sum(axis=axis)
 
     mu = np.angle(r)
 
