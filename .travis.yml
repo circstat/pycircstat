@@ -4,6 +4,6 @@ python:
   - "3.4"
   - "2.7"
 # command to install dependencies
-install: pip install numpy nose
+install: pip install numpy scipy nose
 # command to run tests
 script: python setup.py nosetests
