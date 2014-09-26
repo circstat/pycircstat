@@ -1,3 +1,3 @@
 from __future__ import absolute_import
 
-from .descriptive import mean
+from .descriptive import *
