@@ -3,6 +3,8 @@ python:
   - "3.3"
   - "3.4"
   - "2.7"
+before_install:
+  - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
 # command to install dependencies
 install: pip install numpy scipy nose
 # command to run tests
