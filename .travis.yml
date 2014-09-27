@@ -6,6 +6,6 @@ python:
 before_install:
   - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
 # command to install dependencies
-install: pip install numpy scipy nose
+install: pip install numpy scipy nose python-coveralls nose-cov
 # command to run tests
-script: python setup.py nosetests
+script: nosetests --with-cov --cov PyCircStat
