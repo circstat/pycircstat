@@ -47,7 +47,7 @@ def test_mean_ci_2d():
     muminus = np.array([np.NaN, 0.89931])
     mu = np.array([1.6537, 1.7998])
 
-    mu_tmp, muplus_tmp, muminus_tmp = PyCircStat.mean(data, ci=0.95, axis=0)
+    mu_tmp, muminus_tmp, muplus_tmp = PyCircStat.mean(data, ci=0.95, axis=0)
     assert_allclose(muplus, muplus_tmp, rtol=1e-4)
     assert_allclose(muminus, muminus_tmp, rtol=1e-4)
     assert_allclose(mu, mu_tmp, rtol=1e-4)
@@ -58,9 +58,28 @@ def test_mean_ci_1d():
     muminus = 0.89931
     mu = 1.7998
 
-    mu_tmp, muplus_tmp, muminus_tmp = PyCircStat.mean(data, ci=0.95)
+    mu_tmp, muminus_tmp, muplus_tmp = PyCircStat.mean(data, ci=0.95)
     assert_allclose(muplus, muplus_tmp, rtol=1e-4)
     assert_allclose(muminus, muminus_tmp, rtol=1e-4)
     assert_allclose(mu, mu_tmp, rtol=1e-4)
 
+def test_center():
+    data = np.random.rand(1000)*2*np.pi
+    assert_allclose(PyCircStat.mean(PyCircStat.center(data)), 0., rtol=1e-3, atol=1e-3)
+
+def test_corrcc():
+    data1 = np.random.rand(50000)*2*np.pi
+    data2 = np.random.rand(50000)*2*np.pi
+    assert_allclose(PyCircStat.corrcc(data1, data2), 0., rtol=1e-2, atol=1e-2)
+
+def test_corrcc_ci():
+    data1 = np.random.rand(200)*2*np.pi
+    data2 = np.asarray(data1)
+    assert_allclose(PyCircStat.corrcc(data1, data2, ci=0.95), (1.,1.,1.))
+
+def test_corrcc_ci_2d():
+    data1 = np.random.rand(2,200)*np.pi
+    data2 = np.asarray(data1)
+    assert_allclose(PyCircStat.corrcc(data1, data2, ci=0.95, axis=1),
+                    (np.ones(2), np.ones(2), np.ones(2)))
 

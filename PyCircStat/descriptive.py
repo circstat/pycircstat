@@ -5,6 +5,7 @@ Descriptive statistical functions
 import numpy as np
 from scipy import stats
 import warnings
+from PyCircStat.iterators import nd_bootstrap
 
 
 def mean(alpha, w=None, ci=None, d=None, axis=0):
@@ -40,7 +41,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=0):
         return mu
     else:
         t = mean_ci_limits(alpha, ci=ci, w=w, d=d, axis=axis)
-        return mu, mu + t, mu - t
+        return mu, mu - t, mu + t
 
 
 def resultant_vector_length(alpha, w=None, d=None, axis=0):
@@ -106,16 +107,78 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
 
     t = np.NaN * np.empty_like(r)
 
-    idx = (r < .9) & (r > np.sqrt(c2 / 2 / n))
-    t[idx] = np.sqrt((2 * n[idx] * (2 * R[idx] ** 2 - n[idx] * c2)) / (4 * n[idx] - c2))  # eq. 26.24
+    if type(n) == np.ndarray:
+        idx = (r < .9) & (r > np.sqrt(c2 / 2 / n))
+        t[idx] = np.sqrt((2 * n[idx] * (2 * R[idx] ** 2 - n[idx] * c2)) / (4 * n[idx] - c2))  # eq. 26.24
 
-    idx2 = (r >= .9)
-    t[idx2] = np.sqrt(n[idx2] ** 2 - (n[idx2] ** 2 - R[idx2] ** 2) * np.exp(c2 / n[idx2]))  # equ. 26.25
-
-    if not np.all(idx | idx2):
-        warnings.warn('Requirements for confidence levels not met.')
+        idx2 = (r >= .9)
+        t[idx2] = np.sqrt(n[idx2] ** 2 - (n[idx2] ** 2 - R[idx2] ** 2) * np.exp(c2 / n[idx2]))  # equ. 26.25
+        if not np.all(idx | idx2):
+            warnings.warn('Requirements for confidence levels not met.')
+    else:
+        if r < .9 and r > np.sqrt(c2 / 2 / n):
+            t = np.sqrt((2 * n * (2 * R ** 2 - n * c2)) / (4 * n - c2))  # eq. 26.24
+        elif r >= .9:
+            t = np.sqrt(n ** 2 - (n ** 2 - R ** 2) * np.exp(c2 / n))  # equ. 26.25
+        else:
+            warnings.warn('Requirements for confidence levels not met.')
 
     return np.arccos(t / R)
 
 
+def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
+    """
+    Circular correlation coefficient for two circular random variables.
 
+    If a confidence level is specified, confidence limits are bootstrapped. The number of bootstrapping
+    iterations is min(number of data points along axis, bootstrap_max_iter).
+
+    :param alpha1: sample of angles in radians
+    :param alpha2: sample of angles in radians
+    :param axis: correlation coefficient is computed along this dimension (default axis=0)
+    :param ci: if not None, confidence level is bootstrapped
+    :param bootstrap_max_iter: maximal number of bootstrap iterations
+    :return: correlation coefficient if ci=None, otherwise correlation
+             coefficient with lower and upper confidence limits
+
+    References: [Jammalamadaka2001]_
+    """
+    assert alpha1.shape == alpha2.shape, 'Input dimensions do not match.'
+
+    # center data on circular mean
+    alpha1, alpha2 = center(alpha1, alpha2, axis=axis)
+
+    # compute correlation coeffcient from p. 176
+    num = np.sum(np.sin(alpha1) * np.sin(alpha2), axis=axis)
+    den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
+
+    if ci is None:
+        return num / den
+    else:
+        r = [corrcc(a1,a2, ci=None, axis=axis) for a1, a2 in
+             nd_bootstrap((alpha1, alpha2),min(alpha1.shape[axis],bootstrap_max_iter), axis=axis)]
+
+        ci_low, ci_high = np.percentile(r, [(1-ci)/2*100, (1+ci)/2*100], axis=0)
+        return np.mean(r, axis=0), ci_low, ci_high
+
+
+
+
+
+def center(*args, **kwargs):
+    """
+    Centers the data on its circular mean.
+
+    Each non-keyword argument is another data array that is centered.
+
+    :param axis: the mean is computed along this dimension (default axis=0).
+                **Must be used as a keyword argument!**
+    :return: tuple of centered data arrays
+
+    """
+    axis = kwargs.pop('axis', 0)
+    reshaper = tuple(slice(None,None) if i != axis else np.newaxis for i in range(len(args[0].shape)))
+    if len(args) == 1:
+        return args[0] - mean(args[0], axis=axis)
+    else:
+        return tuple([a - mean(a, axis=axis)[reshaper] for a in args if type(a) == np.ndarray])

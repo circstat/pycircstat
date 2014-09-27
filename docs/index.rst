@@ -24,6 +24,7 @@ Contents:
    :maxdepth: 2
 
    descriptive.rst
+   iterators.rst
 
 Disclaimer:
 ===========
