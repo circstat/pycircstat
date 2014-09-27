@@ -18,12 +18,12 @@ def mean(alpha, w=None, ci=None, d=None, axis=0):
               correction factor is used to correct for bias in
               estimation of r, in radians (!)
     :param axis: compute along this dimension, default is 0
-    :return: circular mean if ci=None, or circular mean and confidence interval
+    :return: circular mean if ci=None, or circular mean as well as lower and upper confidence interval limits
 
     Example:
     >>> import numpy as np
     >>> data = 2*np.pi*np.random.rand(10)
-    >>> mu, ci = mean(data, ci=0.95)
+    >>> mu, ci_l, ci_u = mean(data, ci=0.95)
     """
 
     if w is None:
