@@ -7,7 +7,7 @@ from scipy import stats
 import warnings
 
 
-def mean(alpha, w=None, ci = None, d=None, axis=0):
+def mean(alpha, w=None, ci=None, d=None, axis=0):
     """
     Compute mean direction of circular data.
 
@@ -18,12 +18,12 @@ def mean(alpha, w=None, ci = None, d=None, axis=0):
               correction factor is used to correct for bias in
               estimation of r, in radians (!)
     :param axis: compute along this dimension, default is 0
-    :return: circular mean if ci=None, or circular mean and confidence interval
+    :return: circular mean if ci=None, or circular mean as well as lower and upper confidence interval limits
 
     Example:
     >>> import numpy as np
     >>> data = 2*np.pi*np.random.rand(10)
-    >>> mu, ci = mean(data, ci=0.95)
+    >>> mu, ci_l, ci_u = mean(data, ci=0.95)
     """
 
     if w is None:
@@ -40,9 +40,7 @@ def mean(alpha, w=None, ci = None, d=None, axis=0):
         return mu
     else:
         t = mean_ci_limits(alpha, ci=ci, w=w, d=d, axis=axis)
-        return mu, (mu + t, mu - t)
-
-
+        return mu, mu + t, mu - t
 
 
 def resultant_vector_length(alpha, w=None, d=None, axis=0):
@@ -100,8 +98,9 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
 
     assert alpha.shape == w.shape, "Dimensions of data and w do not match!"
 
-    r = resultant_vector_length(alpha, w=w, d=d, axis=axis)
-    n = np.sum(w, axis=axis)
+    r = np.atleast_1d(resultant_vector_length(alpha, w=w, d=d, axis=axis))
+    n = np.atleast_1d(np.sum(w, axis=axis))
+
     R = n * r
     c2 = stats.chi2.ppf(ci, df=1)
 
