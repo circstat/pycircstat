@@ -3,6 +3,8 @@ PyCircStat
 
 Toolbox for circular statistics with Python
 
+**Note:** The toolbox is currently in the initial stages of development. A first running version should be available within a few month. 
+
 Installation
 ------------
 
