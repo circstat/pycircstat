@@ -16,5 +16,5 @@ setup(
         "Topic :: Utilities",
         #"License :: OSI Approved :: MIT License",
     ],
-    setup_requires=['nose>=1.0'],
+    setup_requires=['nose>=1.0','sphinx_bootstrap_theme'],
 )
