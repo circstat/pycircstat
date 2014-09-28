@@ -7,6 +7,16 @@ from nose.tools import assert_equal
 
 import PyCircStat
 
+def test_pairwise_circular_distance():
+    a = np.array([4.85065953, 0.79063862, 1.35698570])
+    b = np.array([5.77091494, 2.02426471])
+    ret = np.array([
+        [-0.92025541, 2.82639482, ],
+        [1.30290899, -1.23362610, ],
+        [1.86925607, -0.66727901, ]
+    ])
+    assert_allclose(PyCircStat.pairwise_circular_distance(a,b), ret)
+
 def test_mean_constant_data():
     data = np.ones(10)
 

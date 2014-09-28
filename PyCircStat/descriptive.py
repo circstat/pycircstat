@@ -8,6 +8,27 @@ import warnings
 from PyCircStat.iterators import nd_bootstrap
 
 
+def pairwise_circular_distance(alpha, beta=None):
+    """
+    All pairwise difference x_i-y_j around the circle computed efficiently.
+
+    :param alpha: sample of circular random variable
+    :param beta: sample of circular random variable
+    :return: matrix with pairwise differences
+
+    References: [Zar2009]_, p. 651
+    """
+    if beta is None:
+        beta = alpha
+
+    # advanced slicing and broadcasting to make pairwise distance work between arbitrary nd arrays
+    reshaper_alpha = len(alpha.shape)*(slice(None,None),) + len(beta.shape)*(np.newaxis,)
+    reshaper_beta = len(alpha.shape)*(np.newaxis,) + len(beta.shape)*(slice(None,None),)
+
+    return np.angle(np.exp(1j*alpha[reshaper_alpha]) / np.exp(1j*beta[reshaper_beta]))
+
+
+
 def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
     """
     Compute mean direction of circular data.
