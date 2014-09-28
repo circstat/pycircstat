@@ -7,10 +7,21 @@ from scipy import stats
 import warnings
 from PyCircStat.iterators import nd_bootstrap
 
-
-def cdist(alpha, beta=None):
+def cdist(alpha, beta):
     """
-    All pairwise difference x_i-y_j around the circle computed efficiently.
+    Difference between pairs :math:`x_i-y_i` around the circle computed efficiently.
+
+    :param alpha:  sample of circular random variable
+    :param beta:   sample of circular random variable
+    :return: distance between the pairs
+    """
+    assert alpha.shape == beta.shape, 'Input dimensions do not match!'
+
+    return np.angle(np.exp(1j*alpha) / np.exp(1j*beta))
+
+def pairwise_cdist(alpha, beta=None):
+    """
+    All pairwise difference :math:`x_i-y_j` around the circle computed efficiently.
 
     :param alpha: sample of circular random variable
     :param beta: sample of circular random variable
