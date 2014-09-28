@@ -29,7 +29,7 @@ Disclaimer:
 ===========
 
 All functions in this toolbox were implemented with care and tested on the examples presented in
-'Biostatistical Analysis' were possible. Nevertheless, they may contain errors or bugs, which may
+'Biostatistical Analysis' where possible. Nevertheless, they may contain errors or bugs, which may
 affect the outcome of your analysis. We do not take responsibility for any harm coming from using
 this toolbox, neither if it is caused by errors in the software nor if it is caused by its improper
 application. Please email us any bugs you find.
