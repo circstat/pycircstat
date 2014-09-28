@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyCircStat'
-copyright = u'2014, Philipp Behrens, Matthias Kümmerer, Fabian Sinz, Tom Wallis, '
+copyright = u'2014, Philipp Berens, Matthias Kümmerer, Fabian Sinz, Tom Wallis, '
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -223,7 +223,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'PyCircStat.tex', u'PyCircStat Documentation',
-   u'Philipp Behrens', 'manual'),
+   u'Philipp Berens', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
