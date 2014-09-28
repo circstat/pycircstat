@@ -30,67 +30,17 @@ def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
 
     """
 
-    csum = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
+    cmean = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
 
-    mu = np.angle(csum)/axial_correction
+    mu = np.angle(cmean) / axial_correction
 
     if ci is None:
         return mu
     else:
-        if axial_correction > 1: # TODO: implement CI for axial correction
+        if axial_correction > 1:  # TODO: implement CI for axial correction
             warnings.warn("Axial correction ignored for confidence intervals.")
         t = mean_ci_limits(alpha, ci=ci, w=w, d=d, axis=axis)
         return mu, mu - t, mu + t
-
-
-def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, ci=None, bootstrap_max_iter=1000):
-    """
-    Computes mean resultant vector length for circular data.
-
-    :param alpha: sample of angles in radians
-    :param w: number of incidences in case of binned angle data
-    :param ci: ci-confidence limits are computed via bootstrapping, default 0.95
-    :param d: spacing of bin centers for binned data, if supplied
-              correction factor is used to correct for bias in
-              estimation of r, in radians (!)
-    :param axis: compute along this dimension, default is 0
-    :param axial_correction: axial correction (2,3,4,...), default is 1
-    :param bootstrap_max_iter: maximal number of bootstrap iterations
-    :return: mean resultant length
-
-    References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
-    """
-
-
-    if ci is None:
-        csum = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
-
-        # obtain length
-        r = np.abs(csum)
-
-        # for data with known spacing, apply correction factor to correct for bias
-        # in the estimation of r (see Zar, p. 601, equ. 26.16)
-        if d is not None:
-            if axial_correction > 1:
-                warnings.warn("Axial correction ignored for bias correction.")
-            c = d / 2 / np.sin(d / 2)
-            r *= c
-        return r
-    else:
-        r = [resultant_vector_length(a, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis) for a in
-             nd_bootstrap((alpha),min(alpha.shape[axis],bootstrap_max_iter), axis=axis)]
-
-        ci_low, ci_high = np.percentile(r, [(1-ci)/2*100, (1+ci)/2*100], axis=0)
-        return np.mean(r, axis=0), ci_low, ci_high
-
-
-def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
-    if w is None:
-        w = np.ones_like(alpha)
-
-    assert w.shape == alpha.shape, "Dimensions of data and w do not match!"
-
-    return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis)/ np.sum(w, axis=axis)
 
 
 def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
@@ -134,6 +84,54 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
     return np.arccos(t / R)
 
 
+def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, ci=None, bootstrap_max_iter=1000):
+    """
+    Computes mean resultant vector length for circular data.
+
+    :param alpha: sample of angles in radians
+    :param w: number of incidences in case of binned angle data
+    :param ci: ci-confidence limits are computed via bootstrapping, default 0.95
+    :param d: spacing of bin centers for binned data, if supplied
+              correction factor is used to correct for bias in
+              estimation of r, in radians (!)
+    :param axis: compute along this dimension, default is 0
+    :param axial_correction: axial correction (2,3,4,...), default is 1
+    :param bootstrap_max_iter: maximal number of bootstrap iterations
+    :return: mean resultant length
+
+    References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
+    """
+
+    if ci is None:
+        cmean = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
+
+        # obtain length
+        r = np.abs(cmean)
+
+        # for data with known spacing, apply correction factor to correct for bias
+        # in the estimation of r (see Zar, p. 601, equ. 26.16)
+        if d is not None:
+            if axial_correction > 1:
+                warnings.warn("Axial correction ignored for bias correction.")
+            r *= d / 2 / np.sin(d / 2)
+        return r
+    else:
+        r = [resultant_vector_length(a, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis) for a in
+             nd_bootstrap((alpha), min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
+
+        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
+        return np.mean(r, axis=0), ci_low, ci_high
+
+
+def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
+    if w is None:
+        w = np.ones_like(alpha)
+
+    assert w.shape == alpha.shape, "Dimensions of data and w do not match!"
+
+    return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)
+
+
 def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
     """
     Circular correlation coefficient for two circular random variables.
@@ -153,7 +151,6 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
     """
     assert alpha1.shape == alpha2.shape, 'Input dimensions do not match.'
 
-
     if ci is None:
         # center data on circular mean
         alpha1, alpha2 = center(alpha1, alpha2, axis=axis)
@@ -163,14 +160,11 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
         den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
         return num / den
     else:
-        r = [corrcc(a1,a2, ci=None, axis=axis) for a1, a2 in
-             nd_bootstrap((alpha1, alpha2),min(alpha1.shape[axis],bootstrap_max_iter), axis=axis)]
+        r = [corrcc(a1, a2, ci=None, axis=axis) for a1, a2 in
+             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)]
 
-        ci_low, ci_high = np.percentile(r, [(1-ci)/2*100, (1+ci)/2*100], axis=0)
+        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
         return np.mean(r, axis=0), ci_low, ci_high
-
-
-
 
 
 def center(*args, **kwargs):
@@ -185,7 +179,7 @@ def center(*args, **kwargs):
 
     """
     axis = kwargs.pop('axis', 0)
-    reshaper = tuple(slice(None,None) if i != axis else np.newaxis for i in range(len(args[0].shape)))
+    reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(args[0].shape)))
     if len(args) == 1:
         return args[0] - mean(args[0], axis=axis)
     else:
