@@ -15,7 +15,7 @@ def test_pairwise_circular_distance():
         [1.30290899, -1.23362610, ],
         [1.86925607, -0.66727901, ]
     ])
-    assert_allclose(PyCircStat.pairwise_circular_distance(a,b), ret)
+    assert_allclose(PyCircStat.cdist(a,b), ret)
 
 def test_mean_constant_data():
     data = np.ones(10)

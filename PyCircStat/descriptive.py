@@ -8,7 +8,7 @@ import warnings
 from PyCircStat.iterators import nd_bootstrap
 
 
-def pairwise_circular_distance(alpha, beta=None):
+def cdist(alpha, beta=None):
     """
     All pairwise difference x_i-y_j around the circle computed efficiently.
 
@@ -26,7 +26,6 @@ def pairwise_circular_distance(alpha, beta=None):
     reshaper_beta = len(alpha.shape)*(np.newaxis,) + len(beta.shape)*(slice(None,None),)
 
     return np.angle(np.exp(1j*alpha[reshaper_alpha]) / np.exp(1j*beta[reshaper_beta]))
-
 
 
 def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
