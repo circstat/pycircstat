@@ -107,21 +107,13 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
 
     t = np.NaN * np.empty_like(r)
 
-    if type(n) == np.ndarray:
-        idx = (r < .9) & (r > np.sqrt(c2 / 2 / n))
-        t[idx] = np.sqrt((2 * n[idx] * (2 * R[idx] ** 2 - n[idx] * c2)) / (4 * n[idx] - c2))  # eq. 26.24
+    idx = (r < .9) & (r > np.sqrt(c2 / 2 / n))
+    t[idx] = np.sqrt((2 * n[idx] * (2 * R[idx] ** 2 - n[idx] * c2)) / (4 * n[idx] - c2))  # eq. 26.24
 
-        idx2 = (r >= .9)
-        t[idx2] = np.sqrt(n[idx2] ** 2 - (n[idx2] ** 2 - R[idx2] ** 2) * np.exp(c2 / n[idx2]))  # equ. 26.25
-        if not np.all(idx | idx2):
-            warnings.warn('Requirements for confidence levels not met.')
-    else:
-        if r < .9 and r > np.sqrt(c2 / 2 / n):
-            t = np.sqrt((2 * n * (2 * R ** 2 - n * c2)) / (4 * n - c2))  # eq. 26.24
-        elif r >= .9:
-            t = np.sqrt(n ** 2 - (n ** 2 - R ** 2) * np.exp(c2 / n))  # equ. 26.25
-        else:
-            warnings.warn('Requirements for confidence levels not met.')
+    idx2 = (r >= .9)
+    t[idx2] = np.sqrt(n[idx2] ** 2 - (n[idx2] ** 2 - R[idx2] ** 2) * np.exp(c2 / n[idx2]))  # equ. 26.25
+    if not np.all(idx | idx2):
+        warnings.warn('Requirements for confidence levels not met.')
 
     return np.arccos(t / R)
 
