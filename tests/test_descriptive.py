@@ -13,6 +13,20 @@ def test_mean_constant_data():
     # We cannot use `assert_equal`, due to numerical rounding errors.
     assert_allclose(PyCircStat.mean(data), 1.0)
 
+def test_mean():
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
+                      4.77054777, 1.51736933, 0.72727580])
+
+    # We cannot use `assert_equal`, due to numerical rounding errors.
+    assert_allclose(PyCircStat.mean(data), 1.35173983)
+
+def test_mean_axial():
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
+                      4.77054777, 1.51736933, 0.72727580])
+
+    # We cannot use `assert_equal`, due to numerical rounding errors.
+    assert_allclose(PyCircStat.mean(data, axial_correction=3), 0.95902619)
+
 def test_resultant_vector_length():
     data = np.ones(10)
     assert_allclose(PyCircStat.resultant_vector_length(data), 1.0)
