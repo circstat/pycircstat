@@ -1,13 +1,67 @@
 """
 Descriptive statistical functions
 """
+import itertools
 
 import numpy as np
 from scipy import stats
 import warnings
 from PyCircStat.iterators import nd_bootstrap
 
-def cdist(alpha, beta):
+def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
+    """
+    Computes the median direction for circular data.
+
+    :param alpha: sample of angles in radians
+    :param axis:  compute along this dimension, default is 0
+    :param ci:    if not None, the upper and lower 100*ci% confidence interval is returned as well
+    :param bootstrap_max_iter: maximal number of bootstrap iterations
+    :return: median direction
+    """
+    if ci is None:
+        dims = [range(alpha.shape[i]) for i in range(len(alpha.shape))]
+        dims[axis] = [slice(None)]
+
+        med = np.empty(alpha.shape[:axis] + alpha.shape[axis+1:])
+        n = alpha.shape[axis]
+        is_odd = (n % 2 == 1)
+        for idx in itertools.product(*dims):
+            out_idx = idx[:axis] + idx[axis+1:]
+
+            beta = alpha[idx] % (2*np.pi)
+
+            dd = pairwise_cdiff(beta)
+            m1 = np.sum(dd>=0,0)
+            m2 = np.sum(dd<=0,0)
+            dm = np.abs(m1-m2)
+
+            if is_odd:
+                min_idx = np.argmin(dm)
+                m = dm[min_idx]
+            else:
+                m = np.min(dm)
+                min_idx = np.argsort(dm)[:2]
+
+            if m > 1:
+                warnings.warn('Ties detected in media computation')
+
+            md = mean(beta[min_idx])
+            if np.abs(cdiff(mean(beta),md)) > np.abs(cdiff(mean(beta),md+np.pi)):
+                md = (md+np.pi) % (2*np.pi)
+
+            med[out_idx] = md
+
+        return med
+    else:
+        warnings.warn('Median bootstrapping uses linear percentile function. ')
+        r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
+
+        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
+        return mean(r, axis=0), ci_low, ci_high
+
+
+
+def cdiff(alpha, beta):
     """
     Difference between pairs :math:`x_i-y_i` around the circle computed efficiently.
 
@@ -19,13 +73,13 @@ def cdist(alpha, beta):
 
     return np.angle(np.exp(1j*alpha) / np.exp(1j*beta))
 
-def pairwise_cdist(alpha, beta=None):
+def pairwise_cdiff(alpha, beta=None):
     """
     All pairwise difference :math:`x_i-y_j` around the circle computed efficiently.
 
     :param alpha: sample of circular random variable
     :param beta: sample of circular random variable
-    :return: matrix with pairwise differences
+    :return: array with pairwise differences
 
     References: [Zar2009]_, p. 651
     """
@@ -148,7 +202,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
         return r
     else:
         r = [resultant_vector_length(a, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis) for a in
-             nd_bootstrap((alpha), min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
+             nd_bootstrap((alpha,), min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
         return np.mean(r, axis=0), ci_low, ci_high
@@ -157,7 +211,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
 def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
     if w is None:
         w = np.ones_like(alpha)
-
+    alpha = np.asarray(alpha)
     assert w.shape == alpha.shape, "Dimensions of data and w do not match!"
 
     return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)

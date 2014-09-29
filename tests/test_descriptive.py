@@ -7,9 +7,22 @@ from nose.tools import assert_equal
 
 import PyCircStat
 
+def test_median():
+    alpha = np.array([
+        [3.73153000, 1.63904879, 4.03175622, 3.90422402, 4.61029613, 4.04117818, 5.79313473, 5.50863002, 5.81530225, 2.44973903],
+        [2.12868554, 0.09073566, 0.05581025, 5.10673712, 1.68712454, 3.72915575, 4.45439608, 4.70694685, 3.58470730, 2.49742028]
+    ])
+    m0 = np.array([2.93010777, 0.86489223, -1.09780942, -1.77770474, -3.13447497, -2.39801834, -1.15941990, -1.17539688, -1.58318053, 2.47357966])
+    m1 = np.array([-2.24671810, -1.24910966])
+    m11 = np.array([-2.24200713, -1.82878923])
+
+    assert_allclose(PyCircStat.median(alpha, axis=1), m1)
+    assert_allclose(PyCircStat.median(alpha[:,:-1], axis=1), m11)
+    assert_allclose(PyCircStat.median(alpha, axis=0), m0)
+
 def test_circular_distance():
     a = np.array([4.85065953, 0.79063862, 1.35698570])
-    assert_allclose(PyCircStat.cdist(a,a), np.zeros_like(a))
+    assert_allclose(PyCircStat.cdiff(a,a), np.zeros_like(a))
 
 def test_pairwise_circular_distance():
     a = np.array([4.85065953, 0.79063862, 1.35698570])
@@ -19,7 +32,7 @@ def test_pairwise_circular_distance():
         [1.30290899, -1.23362610, ],
         [1.86925607, -0.66727901, ]
     ])
-    assert_allclose(PyCircStat.pairwise_cdist(a,b), ret)
+    assert_allclose(PyCircStat.pairwise_cdiff(a,b), ret)
 
 def test_mean_constant_data():
     data = np.ones(10)

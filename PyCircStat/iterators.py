@@ -22,5 +22,8 @@ def nd_bootstrap(data, iterations, axis=0):
 
     for i in range(iterations):
         idx = np.random.randint(m, size=(m,))
-        yield tuple(a[np.ix_(idx), ...].squeeze().transpose(fro) for a in data0)
+        if len(data) == 1:
+            yield data0[0][np.ix_(idx), ...].squeeze().transpose(fro)
+        else:
+            yield tuple(a[np.ix_(idx), ...].squeeze().transpose(fro) for a in data0)
 
