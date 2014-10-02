@@ -11,14 +11,15 @@ from PyCircStat.decorators import mod2pi
 from PyCircStat.iterators import nd_bootstrap
 
 
-def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
+
+def median(alpha, axis=0, ci=None, bootstrap_iter=None):
     """
     Computes the median direction for circular data.
 
     :param alpha: sample of angles in radians
     :param axis:  compute along this dimension, default is 0
     :param ci:    if not None, the upper and lower 100*ci% confidence interval is returned as well
-    :param bootstrap_max_iter: maximal number of bootstrap iterations
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: median direction
     """
     if ci is None:
@@ -56,8 +57,11 @@ def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
 
         return med
     else:
+        if bootstrap_iter is None:
+            bootstrap_iter = alpha.shape[axis]
+
         warnings.warn('Median bootstrapping uses linear percentile function. ')
-        r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
+        r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , bootstrap_iter, axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0) # TODO: write circular percentile (opposite)
         return median(alpha, ci=None, axis=axis), CI(ci_low, ci_high)
@@ -112,7 +116,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
 
     >>> import numpy as np
     >>> data = 2*np.pi*np.random.rand(10)
-    >>> mu, ci_l, ci_u = mean(data, ci=0.95)
+    >>> mu, (ci_l, ci_u) = mean(data, ci=0.95)
 
     """
 
@@ -170,7 +174,7 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
     return np.arccos(t / R)
 
 
-def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, ci=None, bootstrap_max_iter=1000):
+def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, ci=None, bootstrap_iter=None):
     """
     Computes mean resultant vector length for circular data.
 
@@ -182,7 +186,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
               estimation of r, in radians (!)
     :param axis: compute along this dimension, default is 0
     :param axial_correction: axial correction (2,3,4,...), default is 1
-    :param bootstrap_max_iter: maximal number of bootstrap iterations
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: mean resultant length
 
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
@@ -202,8 +206,11 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
             r *= d / 2 / np.sin(d / 2)
         return r
     else:
+        if bootstrap_iter is None:
+            bootstrap_iter = alpha.shape[axis]
+
         r = [resultant_vector_length(a, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis) for a in
-             nd_bootstrap((alpha,), min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
+             nd_bootstrap((alpha,), bootstrap_iter, axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
         return resultant_vector_length(alpha, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis), CI(ci_low, ci_high)
@@ -218,7 +225,7 @@ def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
     return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)
 
 
-def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
+def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_iter=None):
     """
     Circular correlation coefficient for two circular random variables.
 
@@ -229,7 +236,7 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
     :param alpha2: sample of angles in radians
     :param axis: correlation coefficient is computed along this dimension (default axis=0)
     :param ci: if not None, confidence level is bootstrapped
-    :param bootstrap_max_iter: maximal number of bootstrap iterations
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: correlation coefficient if ci=None, otherwise correlation
              coefficient with lower and upper confidence limits
 
@@ -246,8 +253,11 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
         den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
         return num / den
     else:
+        if bootstrap_iter is None:
+            bootstrap_iter = alpha1.shape[axis]
+
         r = [corrcc(a1, a2, ci=None, axis=axis) for a1, a2 in
-             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)] # TODO: new bootstrap iteration number
+             nd_bootstrap((alpha1, alpha2), bootstrap_iter, axis=axis)] # TODO: new bootstrap iteration number
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
         return corrcc(alpha1, alpha2, ci=None, axis=axis), CI(ci_low, ci_high)
