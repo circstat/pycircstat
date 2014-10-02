@@ -60,8 +60,12 @@ def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
         r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0) # TODO: write circular percentile (opposite)
+<<<<<<< HEAD
         return median(alpha, ci=None, axis=axis), CI(ci_low, ci_high)
+=======
+        return mean(r, axis=0), ci_low, ci_high
 
+>>>>>>> intermediate commit
 
 def cdiff(alpha, beta):
     """
@@ -248,10 +252,14 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
         return num / den
     else:
         r = [corrcc(a1, a2, ci=None, axis=axis) for a1, a2 in
-             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)]
+             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)] # TODO: new bootstrap iteration number
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
+<<<<<<< HEAD
         return corrcc(alpha1, alpha2, ci=None, axis=axis), CI(ci_low, ci_high)
+=======
+        return np.mean(r, axis=0), ci_low, ci_high #TODO return r itself? also in median
+>>>>>>> intermediate commit
 
 @mod2pi
 def center(*args, **kwargs):

@@ -7,7 +7,6 @@ def mod2pi(f):
     The decorated function must either return a tuple of numpy.ndarrays or a
     numpy.ndarray itself.
     """
-
     def return_func(*args, **kwargs):
         ret = f(*args, **kwargs)
 
