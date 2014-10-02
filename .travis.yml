@@ -6,6 +6,9 @@ python:
 before_install:
   - sudo apt-get install -qq libatlas-dev libatlas-base-dev liblapack-dev gfortran
 # command to install dependencies
-install: pip install numpy scipy nose
+# By default, pip produces much too much output
+# Just silencing int makes travis think it stalled
+# Because of this, we print every 100th line.
+install: pip install numpy scipy nose python-coveralls nose-cov | sed -n '0~100p'
 # command to run tests
-script: python setup.py nosetests
+script: nosetests --with-cov --cov PyCircStat
