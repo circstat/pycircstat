@@ -25,6 +25,7 @@ Contents:
 
    descriptive.rst
    iterators.rst
+   decorators.rst
 
 Disclaimer:
 ===========

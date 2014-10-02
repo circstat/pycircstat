@@ -6,10 +6,10 @@ import itertools
 import numpy as np
 from scipy import stats
 import warnings
+from PyCircStat import CI
 from PyCircStat.decorators import mod2pi
 from PyCircStat.iterators import nd_bootstrap
 
-#TODO rewrite CIs into namedtuple
 
 def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
     """
@@ -60,7 +60,7 @@ def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
         r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0) # TODO: write circular percentile (opposite)
-        return mean(r, axis=0), ci_low, ci_high
+        return median(alpha, ci=None, axis=axis), CI(ci_low, ci_high)
 
 
 def cdiff(alpha, beta):
@@ -127,7 +127,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
         if axial_correction > 1:  # TODO: implement CI for axial correction
             warnings.warn("Axial correction ignored for confidence intervals.")
         t = mean_ci_limits(alpha, ci=ci, w=w, d=d, axis=axis)
-        return mu, mu - t, mu + t
+        return mu, CI(mu - t, mu + t)
 
 
 def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
@@ -207,7 +207,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
              nd_bootstrap((alpha,), min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
-        return np.mean(r, axis=0), ci_low, ci_high
+        return resultant_vector_length(alpha, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis), CI(ci_low, ci_high)
 
 
 def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
@@ -248,10 +248,10 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
         return num / den
     else:
         r = [corrcc(a1, a2, ci=None, axis=axis) for a1, a2 in
-             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)] # TODO: new bootstrap iteration number
+             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)]
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
-        return np.mean(r, axis=0), ci_low, ci_high #TODO return r itself? also in median
+        return corrcc(alpha1, alpha2, ci=None, axis=axis), CI(ci_low, ci_high)
 
 @mod2pi
 def center(*args, **kwargs):
