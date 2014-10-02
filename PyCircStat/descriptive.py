@@ -6,7 +6,10 @@ import itertools
 import numpy as np
 from scipy import stats
 import warnings
+from PyCircStat.decorators import mod2pi
 from PyCircStat.iterators import nd_bootstrap
+
+#TODO rewrite CIs into namedtuple
 
 def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
     """
@@ -43,7 +46,7 @@ def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
                 min_idx = np.argsort(dm)[:2]
 
             if m > 1:
-                warnings.warn('Ties detected in media computation')
+                warnings.warn('Ties detected in median computation')
 
             md = mean(beta[min_idx])
             if np.abs(cdiff(mean(beta),md)) > np.abs(cdiff(mean(beta),md+np.pi)):
@@ -56,9 +59,8 @@ def median(alpha, axis=0, ci=None, bootstrap_max_iter=1000):
         warnings.warn('Median bootstrapping uses linear percentile function. ')
         r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , min(alpha.shape[axis], bootstrap_max_iter), axis=axis)]
 
-        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
+        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0) # TODO: write circular percentile (opposite)
         return mean(r, axis=0), ci_low, ci_high
-
 
 
 def cdiff(alpha, beta):
@@ -246,12 +248,12 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_max_iter=1000):
         return num / den
     else:
         r = [corrcc(a1, a2, ci=None, axis=axis) for a1, a2 in
-             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)]
+             nd_bootstrap((alpha1, alpha2), min(alpha1.shape[axis], bootstrap_max_iter), axis=axis)] # TODO: new bootstrap iteration number
 
         ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
-        return np.mean(r, axis=0), ci_low, ci_high
+        return np.mean(r, axis=0), ci_low, ci_high #TODO return r itself? also in median
 
-
+@mod2pi
 def center(*args, **kwargs):
     """
     Centers the data on its circular mean.
@@ -264,6 +266,7 @@ def center(*args, **kwargs):
 
     """
     axis = kwargs.pop('axis', 0)
+
     reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(args[0].shape)))
     if len(args) == 1:
         return args[0] - mean(args[0], axis=axis)
