@@ -1,5 +1,4 @@
 from __future__ import absolute_import
-from IPython import embed
 
 import numpy as np
 

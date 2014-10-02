@@ -1,5 +1,4 @@
 import numpy as np
-from pip.backwardcompat import raw_input
 
 
 def nd_bootstrap(data, iterations, axis=0):
