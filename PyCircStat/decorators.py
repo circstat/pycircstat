@@ -12,7 +12,7 @@ def mod2pi(f):
 
         if type(ret) == tuple:
             return tuple(r % (2*np.pi) for r in ret)
-        elif type(ret) == np.ndarray:
+        elif type(ret) == np.ndarray or np.isscalar(ret):
             return ret % (2*np.pi)
         else:
             raise TypeError("Type not known!")

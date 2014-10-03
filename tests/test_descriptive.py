@@ -7,6 +7,37 @@ from nose.tools import assert_equal
 
 import PyCircStat
 
+def test_percentile():
+    alpha = np.linspace(0,2*np.pi,1./0.0001)
+    s = np.random.rand()*2*np.pi
+    q = PyCircStat.percentile(alpha, 5, q0=s)
+    #print(q, s+0.05*np.pi*2)
+    assert_allclose(q, (s+0.05*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
+
+def test_percentile_2q():
+    alpha = np.linspace(0,2*np.pi,1./0.0001)
+    s = np.random.rand()*2*np.pi
+    q = PyCircStat.percentile(alpha, [5,10], q0=s)
+    #print(q, s+np.array([0.05,0.1])*np.pi*2)
+    assert_allclose(q, (s+np.array([0.05,0.1])*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
+
+def test_percentile_2d():
+    alpha = np.linspace(0,2*np.pi,1./0.0001)[None,:]*np.ones((2,1))
+    s = np.random.rand(2)*2*np.pi
+    q = PyCircStat.percentile(alpha, 5, q0=s, axis=1)
+    #print(q,  (s+0.05*np.pi*2) % (2*np.pi))
+    assert_allclose(q,  (s+0.05*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
+
+def test_percentile_2d_2q():
+    alpha = np.linspace(0,2*np.pi,1./0.0001)[None,:]*np.ones((2,1))
+    s = np.random.rand(2)*2*np.pi
+    q = PyCircStat.percentile(alpha, [5, 10], q0=s, axis=1)
+    #print(q, s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)
+    assert_allclose(q,  (s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)%(2*np.pi), atol=0.001, rtol=0.001)
+
+
+
+
 def test_median():
     alpha = np.array([
         [3.73153000, 1.63904879, 4.03175622, 3.90422402, 4.61029613, 4.04117818, 5.79313473, 5.50863002, 5.81530225, 2.44973903],

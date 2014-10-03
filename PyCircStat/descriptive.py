@@ -281,3 +281,54 @@ def center(*args, **kwargs):
         return args[0] - mean(args[0], axis=axis)
     else:
         return tuple([a - mean(a, axis=axis)[reshaper] for a in args if type(a) == np.ndarray])
+
+@mod2pi
+def percentile(alpha, q, q0, axis=None, ci=None, bootstrap_iter=None):
+    """
+    Computes circular percentiles
+
+    :param alpha: array with circular samples
+    :param q: percentiles in [0,100] (single number or iterable)
+    :param q0: value of the 0 percentile
+    :param axis: percentiles will be computed along this axis. If None percentiles will be computed
+                over the entire array
+    :param ci: if not None, confidence level is bootstrapped
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
+
+    :return: percentiles
+
+    """
+    if ci is None:
+        if axis is None:
+            alpha = (alpha.ravel()-q0) % (2*np.pi)
+        else:
+            if len(q0.shape) == len(alpha.shape) - 1:
+                reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(alpha.shape)))
+                q0 = q0[reshaper]
+            elif not len(q0.shape) == len(alpha.shape):
+                raise ValueError("Dimensions of start and alpha are inconsistent!")
+
+            alpha = (alpha - q0) % (2*np.pi)
+
+        ret = []
+        if axis is not None:
+            selector = tuple(slice(None) if i != axis else 0 for i in range(len(alpha.shape)))
+            q0 = q0[selector]
+
+        for qq in np.atleast_1d(q):
+            ret.append(np.percentile(alpha, qq, axis=axis) + q0)
+
+        if not hasattr(q, "__iter__"): # if q is not some sort of list, array, etc
+            return np.asarray(ret).squeeze()
+        else:
+            return np.asarray(ret)
+    else:
+        if bootstrap_iter is None:
+            bootstrap_iter = alpha.shape[axis]
+
+        r = [percentile(a, q, q0, ci=None, axis=axis) for a in nd_bootstrap((alpha,), bootstrap_iter, axis=axis)]
+        r0 = percentile(alpha, q, q0, ci=None, axis=axis)
+        ci_low, ci_high = percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0,
+                                     q0=(r0+np.pi)%(2*np.pi),ci=None)
+        return r0, CI(ci_low, ci_high)
+
