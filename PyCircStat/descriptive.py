@@ -7,11 +7,82 @@ import numpy as np
 from scipy import stats
 import warnings
 from PyCircStat import CI
-from PyCircStat.decorators import mod2pi
 from PyCircStat.iterators import nd_bootstrap
+from PyCircStat.decorators import mod2pi
 
 
+class bootstrap:
+    """
+    Decorator to implement bootstrapping. It looks for the arguments ci, axis, and bootstrap_iter
+    to determine the proper parameters for bootstrapping. The argument scale determines whether
+    the percentile is taken on a circular scale or on a linear scale.
 
+    :param no_bootstrap: the number of arguments that are bootstrapped (e.g. for correlation it would be two,
+                        for median it would be one)
+    :param scale: linear or ciruclar scale (default is 'linear')
+    """
+
+    def __init__(self, no_bootstrap, scale='linear'):
+        self.no_boostrap = no_bootstrap
+        self.scale = scale
+
+    def _get_var(self, f, what, default, args, kwargs, remove=False):
+        varnames = f.func_code.co_varnames
+
+        if what in varnames:
+            what_idx = varnames.index(what)
+        else:
+            raise ValueError('Function %s does not have variable %s.' % (f.__name__, what))
+
+        if len(args) >= what_idx + 1:
+            val = args[what_idx]
+            if remove:
+                args[what_idx] = default
+        elif what in kwargs:
+            if remove:
+                val = kwargs.pop(what, default)
+            else:
+                val = kwargs[what]
+        else:
+            val = default
+
+        return val
+
+
+    def __call__(self, f):
+
+        def wrapped_f(*args, **kwargs):
+            ci = self._get_var(f, 'ci', None, args, kwargs, remove=True)
+            bootstrap_iter = self._get_var(f, 'bootstrap_iter', None, args, kwargs, remove=True)
+            axis = self._get_var(f, 'axis', 0, args, kwargs)  # TODO: change that to None if decided
+
+            alpha = args[:self.no_boostrap]
+            args0 = args[self.no_boostrap:]
+
+            if bootstrap_iter is None:
+                bootstrap_iter = alpha[0].shape[axis]
+
+            r0 = f(*(alpha + args0), **kwargs)
+            if ci is not None:
+                r = np.asarray([f(*(a + args0), **kwargs) for a in nd_bootstrap(alpha, bootstrap_iter, axis=axis,
+                                                                                strip_tuple_if_one=False)])
+
+                if self.scale == 'linear':
+                    ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
+                elif self.scale == 'circular':
+                    ci_low, ci_high = percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100],
+                                                 q0=(r0 + np.pi) % (2 * np.pi), axis=0)
+                else:
+                    raise ValueError('Scale %s not known!' % (self.scale, ))
+                return r0, CI(ci_low, ci_high)
+            else:
+                return r0
+
+
+        return wrapped_f
+
+
+@bootstrap(1, 'circular')
 def median(alpha, axis=0, ci=None, bootstrap_iter=None):
     """
     Computes the median direction for circular data.
@@ -22,49 +93,40 @@ def median(alpha, axis=0, ci=None, bootstrap_iter=None):
     :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: median direction
     """
-    if ci is None:
-        dims = [range(alpha.shape[i]) for i in range(len(alpha.shape))]
-        dims[axis] = [slice(None)]
+    dims = [range(alpha.shape[i]) for i in range(len(alpha.shape))]
+    dims[axis] = [slice(None)]
 
-        med = np.empty(alpha.shape[:axis] + alpha.shape[axis+1:])
-        n = alpha.shape[axis]
-        is_odd = (n % 2 == 1)
-        for idx in itertools.product(*dims):
-            out_idx = idx[:axis] + idx[axis+1:]
+    med = np.empty(alpha.shape[:axis] + alpha.shape[axis + 1:])
+    n = alpha.shape[axis]
+    is_odd = (n % 2 == 1)
+    for idx in itertools.product(*dims):
+        out_idx = idx[:axis] + idx[axis + 1:]
 
-            beta = alpha[idx] % (2*np.pi)
+        beta = alpha[idx] % (2 * np.pi)
 
-            dd = pairwise_cdiff(beta)
-            m1 = np.sum(dd>=0,0)
-            m2 = np.sum(dd<=0,0)
-            dm = np.abs(m1-m2)
+        dd = pairwise_cdiff(beta)
+        m1 = np.sum(dd >= 0, 0)
+        m2 = np.sum(dd <= 0, 0)
+        dm = np.abs(m1 - m2)
 
-            if is_odd:
-                min_idx = np.argmin(dm)
-                m = dm[min_idx]
-            else:
-                m = np.min(dm)
-                min_idx = np.argsort(dm)[:2]
+        if is_odd:
+            min_idx = np.argmin(dm)
+            m = dm[min_idx]
+        else:
+            m = np.min(dm)
+            min_idx = np.argsort(dm)[:2]
 
-            if m > 1:
-                warnings.warn('Ties detected in median computation')
+        if m > 1:
+            warnings.warn('Ties detected in median computation')
 
-            md = mean(beta[min_idx])
-            if np.abs(cdiff(mean(beta),md)) > np.abs(cdiff(mean(beta),md+np.pi)):
-                md = (md+np.pi) % (2*np.pi)
+        md = mean(beta[min_idx])
+        if np.abs(cdiff(mean(beta), md)) > np.abs(cdiff(mean(beta), md + np.pi)):
+            md = (md + np.pi) % (2 * np.pi)
 
-            med[out_idx] = md
+        med[out_idx] = md
 
-        return med
-    else:
-        if bootstrap_iter is None:
-            bootstrap_iter = alpha.shape[axis]
+    return med
 
-        warnings.warn('Median bootstrapping uses linear percentile function. ')
-        r = [median(a, ci=None, axis=axis) for a in nd_bootstrap((alpha,) , bootstrap_iter, axis=axis)]
-
-        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0) # TODO: write circular percentile (opposite)
-        return median(alpha, ci=None, axis=axis), CI(ci_low, ci_high)
 
 def cdiff(alpha, beta):
     """
@@ -76,7 +138,8 @@ def cdiff(alpha, beta):
     """
     assert alpha.shape == beta.shape, 'Input dimensions do not match!'
 
-    return np.angle(np.exp(1j*alpha) / np.exp(1j*beta))
+    return np.angle(np.exp(1j * alpha) / np.exp(1j * beta))
+
 
 def pairwise_cdiff(alpha, beta=None):
     """
@@ -92,10 +155,10 @@ def pairwise_cdiff(alpha, beta=None):
         beta = alpha
 
     # advanced slicing and broadcasting to make pairwise distance work between arbitrary nd arrays
-    reshaper_alpha = len(alpha.shape)*(slice(None,None),) + len(beta.shape)*(np.newaxis,)
-    reshaper_beta = len(alpha.shape)*(np.newaxis,) + len(beta.shape)*(slice(None,None),)
+    reshaper_alpha = len(alpha.shape) * (slice(None, None),) + len(beta.shape) * (np.newaxis,)
+    reshaper_beta = len(alpha.shape) * (np.newaxis,) + len(beta.shape) * (slice(None, None),)
 
-    return np.angle(np.exp(1j*alpha[reshaper_alpha]) / np.exp(1j*beta[reshaper_beta]))
+    return np.angle(np.exp(1j * alpha[reshaper_alpha]) / np.exp(1j * beta[reshaper_beta]))
 
 
 def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
@@ -174,6 +237,7 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
     return np.arccos(t / R)
 
 
+@bootstrap(1, 'linear')
 def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, ci=None, bootstrap_iter=None):
     """
     Computes mean resultant vector length for circular data.
@@ -192,28 +256,18 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
 
-    if ci is None:
-        cmean = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
+    cmean = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
 
-        # obtain length
-        r = np.abs(cmean)
+    # obtain length
+    r = np.abs(cmean)
 
-        # for data with known spacing, apply correction factor to correct for bias
-        # in the estimation of r (see Zar, p. 601, equ. 26.16)
-        if d is not None:
-            if axial_correction > 1:
-                warnings.warn("Axial correction ignored for bias correction.")
-            r *= d / 2 / np.sin(d / 2)
-        return r
-    else:
-        if bootstrap_iter is None:
-            bootstrap_iter = alpha.shape[axis]
-
-        r = [resultant_vector_length(a, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis) for a in
-             nd_bootstrap((alpha,), bootstrap_iter, axis=axis)]
-
-        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
-        return resultant_vector_length(alpha, w=w, axial_correction=axial_correction, d=d, ci=None, axis=axis), CI(ci_low, ci_high)
+    # for data with known spacing, apply correction factor to correct for bias
+    # in the estimation of r (see Zar, p. 601, equ. 26.16)
+    if d is not None:
+        if axial_correction > 1:
+            warnings.warn("Axial correction ignored for bias correction.")
+        r *= d / 2 / np.sin(d / 2)
+    return r
 
 
 def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
@@ -225,6 +279,7 @@ def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
     return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)
 
 
+@bootstrap(2, 'linear')
 def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_iter=None):
     """
     Circular correlation coefficient for two circular random variables.
@@ -244,23 +299,14 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_iter=None):
     """
     assert alpha1.shape == alpha2.shape, 'Input dimensions do not match.'
 
-    if ci is None:
-        # center data on circular mean
-        alpha1, alpha2 = center(alpha1, alpha2, axis=axis)
+    # center data on circular mean
+    alpha1, alpha2 = center(alpha1, alpha2, axis=axis)
 
-        # compute correlation coeffcient from p. 176
-        num = np.sum(np.sin(alpha1) * np.sin(alpha2), axis=axis)
-        den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
-        return num / den
-    else:
-        if bootstrap_iter is None:
-            bootstrap_iter = alpha1.shape[axis]
+    # compute correlation coeffcient from p. 176
+    num = np.sum(np.sin(alpha1) * np.sin(alpha2), axis=axis)
+    den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
+    return num / den
 
-        r = [corrcc(a1, a2, ci=None, axis=axis) for a1, a2 in
-             nd_bootstrap((alpha1, alpha2), bootstrap_iter, axis=axis)] # TODO: new bootstrap iteration number
-
-        ci_low, ci_high = np.percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0)
-        return corrcc(alpha1, alpha2, ci=None, axis=axis), CI(ci_low, ci_high)
 
 @mod2pi
 def center(*args, **kwargs):
@@ -283,6 +329,7 @@ def center(*args, **kwargs):
         return tuple([a - mean(a, axis=axis)[reshaper] for a in args if type(a) == np.ndarray])
 
 @mod2pi
+@bootstrap(1, 'circular')
 def percentile(alpha, q, q0, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes circular percentiles
@@ -298,37 +345,29 @@ def percentile(alpha, q, q0, axis=None, ci=None, bootstrap_iter=None):
     :return: percentiles
 
     """
-    if ci is None:
-        if axis is None:
-            alpha = (alpha.ravel()-q0) % (2*np.pi)
-        else:
-            if len(q0.shape) == len(alpha.shape) - 1:
-                reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(alpha.shape)))
-                q0 = q0[reshaper]
-            elif not len(q0.shape) == len(alpha.shape):
-                raise ValueError("Dimensions of start and alpha are inconsistent!")
-
-            alpha = (alpha - q0) % (2*np.pi)
-
-        ret = []
-        if axis is not None:
-            selector = tuple(slice(None) if i != axis else 0 for i in range(len(alpha.shape)))
-            q0 = q0[selector]
-
-        for qq in np.atleast_1d(q):
-            ret.append(np.percentile(alpha, qq, axis=axis) + q0)
-
-        if not hasattr(q, "__iter__"): # if q is not some sort of list, array, etc
-            return np.asarray(ret).squeeze()
-        else:
-            return np.asarray(ret)
+    if axis is None:
+        alpha = (alpha.ravel() - q0) % (2 * np.pi)
     else:
-        if bootstrap_iter is None:
-            bootstrap_iter = alpha.shape[axis]
+        if len(q0.shape) == len(alpha.shape) - 1:
+            reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(alpha.shape)))
+            q0 = q0[reshaper]
+        elif not len(q0.shape) == len(alpha.shape):
+            raise ValueError("Dimensions of start and alpha are inconsistent!")
 
-        r = [percentile(a, q, q0, ci=None, axis=axis) for a in nd_bootstrap((alpha,), bootstrap_iter, axis=axis)]
-        r0 = percentile(alpha, q, q0, ci=None, axis=axis)
-        ci_low, ci_high = percentile(r, [(1 - ci) / 2 * 100, (1 + ci) / 2 * 100], axis=0,
-                                     q0=(r0+np.pi)%(2*np.pi),ci=None)
-        return r0, CI(ci_low, ci_high)
+        alpha = (alpha - q0) % (2 * np.pi)
+
+    ret = []
+    if axis is not None:
+        selector = tuple(slice(None) if i != axis else 0 for i in range(len(alpha.shape)))
+        q0 = q0[selector]
+
+    for qq in np.atleast_1d(q):
+        ret.append(np.percentile(alpha, qq, axis=axis) + q0)
+
+    if not hasattr(q, "__iter__"):  # if q is not some sort of list, array, etc
+        return np.asarray(ret).squeeze()
+    else:
+        return np.asarray(ret)
+
+
 

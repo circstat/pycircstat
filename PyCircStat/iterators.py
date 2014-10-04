@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def nd_bootstrap(data, iterations, axis=0):
+def nd_bootstrap(data, iterations, axis=0, strip_tuple_if_one=True):
     """
     Bootstrap iterator for several n-dimensional data arrays.
 
@@ -21,7 +21,7 @@ def nd_bootstrap(data, iterations, axis=0):
 
     for i in range(iterations):
         idx = np.random.randint(m, size=(m,))
-        if len(data) == 1:
+        if len(data) == 1 and strip_tuple_if_one:
             yield data0[0][np.ix_(idx), ...].squeeze().transpose(fro)
         else:
             yield tuple(a[np.ix_(idx), ...].squeeze().transpose(fro) for a in data0)

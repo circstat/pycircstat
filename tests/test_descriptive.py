@@ -51,6 +51,21 @@ def test_median():
     assert_allclose(PyCircStat.median(alpha[:,:-1], axis=1), m11)
     assert_allclose(PyCircStat.median(alpha, axis=0), m0)
 
+def test_median_ci():
+    alpha = np.ones((2,10))
+    m1 = np.ones(2)
+    m0 = np.ones(10)
+    mout1, ci_1 = PyCircStat.median(alpha, axis=1, ci=.8)
+    mout0, ci_0 = PyCircStat.median(alpha, axis=0, ci=.8)
+    assert_allclose(mout1, m1)
+    assert_allclose(mout0, m0)
+    assert_allclose(ci_0.lower, m0)
+    assert_allclose(ci_0.upper, m0)
+    assert_allclose(ci_1.lower, m1)
+    assert_allclose(ci_1.upper, m1)
+
+
+
 def test_circular_distance():
     a = np.array([4.85065953, 0.79063862, 1.35698570])
     assert_allclose(PyCircStat.cdiff(a,a), np.zeros_like(a))
