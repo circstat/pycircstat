@@ -27,7 +27,7 @@ class bootstrap:
         self.scale = scale
 
     def _get_var(self, f, what, default, args, kwargs, remove=False):
-        varnames = f.func_code.co_varnames
+        varnames = f.__code__.co_varnames
 
         if what in varnames:
             what_idx = varnames.index(what)
