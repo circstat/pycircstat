@@ -8,7 +8,26 @@ class cardioid_gen(rv_continuous):
 
     Cardioid distribution of a single random variable.
 
-    :param rho: concentration parameter (-0.5 <= rho <= 0.5)
+    .. math::
+
+        p(x) = \\frac{1 + 2 \\rho \\cos(x - \\mu)}{2\\pi}
+
+
+    :param mu: mean (in [0, 2*pi])
+    :param rho: concentration parameter (in [-0.5,0.5])
+
+
+
+    **Note:**
+
+        - To use the distribution, use *cardioid*, not *cardioid_gen*.
+        - See scipy.stats how to use distributions.
+
+    **Example:**
+    
+    >>> import numpy as np
+    >>> mu, rho = np.pi, .2
+    >>> x = cardioid.rvs( mu, rho, size=1000)
 
     References: [Jammalamadaka2001]_
 
@@ -32,3 +51,4 @@ class cardioid_gen(rv_continuous):
 
 
 cardioid = cardioid_gen(name='cardioid', a=0, b=2 * np.pi)
+
