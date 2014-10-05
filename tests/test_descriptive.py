@@ -10,7 +10,7 @@ import PyCircStat
 def test_var():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
                       4.77054777, 1.51736933, 0.72727580])
-    s, ci = PyCircStat.var(data)
+    s = PyCircStat.var(data)
     assert_allclose(0.65842, s, atol=0.001, rtol=0.001)
 
 
@@ -19,6 +19,19 @@ def test_avar():
                       4.77054777, 1.51736933, 0.72727580])
     s = PyCircStat.avar(data)
     assert_allclose(1.3168, s, atol=0.001, rtol=0.001)
+
+def test_std():
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
+                      4.77054777, 1.51736933, 0.72727580])
+    s = PyCircStat.std(data)
+    assert_allclose(1.4657, s, atol=0.001, rtol=0.001)
+
+
+def test_astd():
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
+                      4.77054777, 1.51736933, 0.72727580])
+    s = PyCircStat.astd(data)
+    assert_allclose(1.1475, s, atol=0.001, rtol=0.001)
 
 
 def test_percentile():

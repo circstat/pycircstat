@@ -398,6 +398,32 @@ def var(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
 
     return 1 - r
 
+@bootstrap(1, 'linear')
+def std(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+    """
+    Computes circular standard deviation for circular data.
+    :param alpha: sample of angles in radian
+    :param w: 	  number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension, default is 0
+    :param bootstrap_iter: if not None, confidence level is bootstrapped
+    :param ci:   number of bootstrap iterations (number of samples if None)
+    :return:      circular variance 1 - resultant vector length
+
+    References: [Zar2009]_
+    """
+    if w is None:
+        w = np.ones_like(alpha)
+
+    assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    r = resultant_vector_length(alpha, w=w, d=d, axis=axis)
+
+
+    return np.sqrt(-2*np.log(r))
+
 
 @bootstrap(1, 'linear')
 def avar(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
@@ -421,3 +447,26 @@ def avar(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
         w = np.ones_like(alpha)
 
     return 2 * var(alpha, w=w, d=d, axis=axis, ci=None)
+
+@bootstrap(1, 'linear')
+def astd(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+    """
+    Computes angular standard deviation for circular data.
+
+    :param alpha: sample of angles in radian
+    :param w: 	  number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension, default is 0
+    :param bootstrap_iter: if not None, confidence level is bootstrapped
+    :param ci:   number of bootstrap iterations (number of samples if None)
+    :return:      2 * circular variance
+
+    References: [Zar2009]_
+    """
+
+    if w is None:
+        w = np.ones_like(alpha)
+
+    return np.sqrt(avar(alpha, w=w, d=d, axis=axis, ci=None))
