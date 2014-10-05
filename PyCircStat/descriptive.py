@@ -268,6 +268,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
         if axial_correction > 1:
             warnings.warn("Axial correction ignored for bias correction.")
         r *= d / 2 / np.sin(d / 2)
+    print(r)
     return r
 
 
@@ -371,4 +372,52 @@ def percentile(alpha, q, q0, axis=None, ci=None, bootstrap_iter=None):
         return np.asarray(ret)
 
 
+@bootstrap(1, 'linear')
+def var(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+    """
+    Computes circular variance for circular data (equ. 26.17/18, Zar).
+    :param alpha: sample of angles in radian
+    :param w: 	  number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension, default is 0
+    :param bootstrap_iter: if not None, confidence level is bootstrapped
+    :param ci:   number of bootstrap iterations (number of samples if None)
+    :return:      circular variance 1 - resultant vector length
 
+    References: [Zar2009]_
+    """
+    if w is None:
+        w = np.ones_like(alpha)
+
+    assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    r = resultant_vector_length(alpha, w=w, d=d, axis=axis)
+
+
+    return 1 - r
+
+
+@bootstrap(1, 'linear')
+def avar(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+    """
+    Computes angular variance for circular data (equ. 26.17/18, Zar).
+
+    :param alpha: sample of angles in radian
+    :param w: 	  number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension, default is 0
+    :param bootstrap_iter: if not None, confidence level is bootstrapped
+    :param ci:   number of bootstrap iterations (number of samples if None)
+    :return:      2 * circular variance
+
+    References: [Zar2009]_
+    """
+
+    if w is None:
+        w = np.ones_like(alpha)
+
+    return 2 * var(alpha, w=w, d=d, axis=axis, ci=None)

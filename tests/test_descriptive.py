@@ -7,6 +7,20 @@ from nose.tools import assert_equal
 
 import PyCircStat
 
+def test_var():
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
+                      4.77054777, 1.51736933, 0.72727580])
+    s, ci = PyCircStat.var(data)
+    assert_allclose(0.65842, s, atol=0.001, rtol=0.001)
+
+
+def test_avar():
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
+                      4.77054777, 1.51736933, 0.72727580])
+    s = PyCircStat.avar(data)
+    assert_allclose(1.3168, s, atol=0.001, rtol=0.001)
+
+
 def test_percentile():
     alpha = np.linspace(0,2*np.pi,1./0.0001)
     s = np.random.rand()*2*np.pi
@@ -85,6 +99,7 @@ def test_mean_constant_data():
 
     # We cannot use `assert_equal`, due to numerical rounding errors.
     assert_allclose(PyCircStat.mean(data), 1.0)
+
 
 def test_mean():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
