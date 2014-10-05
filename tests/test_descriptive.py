@@ -3,9 +3,36 @@ from __future__ import absolute_import
 import numpy as np
 
 from numpy.testing import assert_allclose
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_true
 
 import PyCircStat
+
+axis_1arg_test_funcs = [PyCircStat.astd, PyCircStat.avar, PyCircStat.mean, PyCircStat.median,
+                    PyCircStat.resultant_vector_length, PyCircStat.std, PyCircStat.var]
+
+axis_2arg_test_funcs = [PyCircStat.corrcc]
+
+def test_axis_1arg():
+    data = np.random.rand(2,3,5)*np.pi
+    for f in axis_1arg_test_funcs:
+        for a in [None, 0, 1, 2]:
+            ret = f(data, axis=a)
+
+            if a is None:
+                assert_true(isinstance(ret, np.ndarray) or np.isscalar(ret))
+            else:
+                assert_equal(ret.shape, data.shape[:a] + data.shape[a+1:])
+
+def test_axis_2arg():
+    data = np.random.rand(2,3,5)*np.pi
+    for f in axis_2arg_test_funcs:
+        for a in [None, 0, 1, 2]:
+            ret = f(data, data, axis=a)
+            if a is None:
+                assert_true(isinstance(ret, np.ndarray) or np.isscalar(ret))
+            else:
+                assert_equal(ret.shape, data.shape[:a] + data.shape[a+1:])
+
 
 def test_var():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
@@ -73,10 +100,12 @@ def test_median():
     m0 = np.array([2.93010777, 0.86489223, -1.09780942, -1.77770474, -3.13447497, -2.39801834, -1.15941990, -1.17539688, -1.58318053, 2.47357966])
     m1 = np.array([-2.24671810, -1.24910966])
     m11 = np.array([-2.24200713, -1.82878923])
-
+    mall = -2.2467
     assert_allclose(PyCircStat.median(alpha, axis=1), m1)
     assert_allclose(PyCircStat.median(alpha[:,:-1], axis=1), m11)
     assert_allclose(PyCircStat.median(alpha, axis=0), m0)
+    assert_allclose(PyCircStat.median(alpha), mall, atol=1e-4)
+
 
 def test_median_ci():
     alpha = np.ones((2,10))
@@ -84,12 +113,17 @@ def test_median_ci():
     m0 = np.ones(10)
     mout1, ci_1 = PyCircStat.median(alpha, axis=1, ci=.8)
     mout0, ci_0 = PyCircStat.median(alpha, axis=0, ci=.8)
+    moutall, ci_all = PyCircStat.median(alpha, axis=0, ci=.8)
+
     assert_allclose(mout1, m1)
     assert_allclose(mout0, m0)
+    assert_allclose(moutall, 1.)
     assert_allclose(ci_0.lower, m0)
     assert_allclose(ci_0.upper, m0)
     assert_allclose(ci_1.lower, m1)
     assert_allclose(ci_1.upper, m1)
+    assert_allclose(ci_all.lower, 1.)
+    assert_allclose(ci_all.upper, 1.)
 
 
 
@@ -185,7 +219,7 @@ def test_center():
 def test_corrcc():
     data1 = np.random.rand(50000)*2*np.pi
     data2 = np.random.rand(50000)*2*np.pi
-    assert_allclose(PyCircStat.corrcc(data1, data2), 0., rtol=1e-2, atol=1e-2)
+    assert_allclose(PyCircStat.corrcc(data1, data2), 0., rtol=3*1e-2, atol=3*1e-2)
 
 def test_corrcc_ci():
     data1 = np.random.rand(200)*2*np.pi

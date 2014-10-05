@@ -27,8 +27,7 @@ class bootstrap:
         self.scale = scale
 
     def _get_var(self, f, what, default, args, kwargs, remove=False):
-        varnames = f.__code__\
-            .co_varnames
+        varnames = f.__code__.co_varnames
 
         if what in varnames:
             what_idx = varnames.index(what)
@@ -55,13 +54,13 @@ class bootstrap:
         def wrapped_f(*args, **kwargs):
             ci = self._get_var(f, 'ci', None, args, kwargs, remove=True)
             bootstrap_iter = self._get_var(f, 'bootstrap_iter', None, args, kwargs, remove=True)
-            axis = self._get_var(f, 'axis', 0, args, kwargs)  # TODO: change that to None if decided
+            axis = self._get_var(f, 'axis', None, args, kwargs)
 
             alpha = args[:self.no_boostrap]
             args0 = args[self.no_boostrap:]
 
             if bootstrap_iter is None:
-                bootstrap_iter = alpha[0].shape[axis]
+                bootstrap_iter = alpha[0].shape[axis] if axis is not None else alpha[0].size
 
             r0 = f(*(alpha + args0), **kwargs)
             if ci is not None:
@@ -84,16 +83,20 @@ class bootstrap:
 
 
 @bootstrap(1, 'circular')
-def median(alpha, axis=0, ci=None, bootstrap_iter=None):
+def median(alpha, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes the median direction for circular data.
 
     :param alpha: sample of angles in radians
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None (across all dimensions)
     :param ci:    if not None, the upper and lower 100*ci% confidence interval is returned as well
     :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: median direction
     """
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
+
     dims = [range(alpha.shape[i]) for i in range(len(alpha.shape))]
     dims[axis] = [slice(None)]
 
@@ -162,7 +165,7 @@ def pairwise_cdiff(alpha, beta=None):
     return np.angle(np.exp(1j * alpha[reshaper_alpha]) / np.exp(1j * beta[reshaper_beta]))
 
 
-def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
+def mean(alpha, w=None, ci=None, d=None, axis=None, axial_correction=1):
     """
     Compute mean direction of circular data.
 
@@ -172,7 +175,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
     :param d: spacing of bin centers for binned data, if supplied
               correction factor is used to correct for bias in
               estimation of r, in radians (!)
-    :param axis: compute along this dimension, default is 0
+    :param axis: compute along this dimension, default is None (across all dimensions)
     :param axial_correction: axial correction (2,3,4,...), default is 1
     :return: circular mean if ci=None, or circular mean as well as lower and upper confidence interval limits
 
@@ -197,7 +200,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=0, axial_correction=1):
         return mu, CI(mu - t, mu + t)
 
 
-def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
+def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=None):
     """
     Computes the confidence limits on the mean for circular data.
 
@@ -207,7 +210,7 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
     :param d: spacing of bin centers for binned data, if supplied
               correction factor is used to correct for bias in
               estimation of r, in radians (!)
-    :param axis: compute along this dimension, default is 0
+    :param axis: compute along this dimension, default is None (across all dimensions)
 
     :return: confidence limit width d; mean +- d yields upper/lower (1-xi)% confidence limit
 
@@ -239,7 +242,7 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=0):
 
 
 @bootstrap(1, 'linear')
-def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, ci=None, bootstrap_iter=None):
+def resultant_vector_length(alpha, w=None, d=None, axis=None, axial_correction=1, ci=None, bootstrap_iter=None):
     """
     Computes mean resultant vector length for circular data.
 
@@ -249,13 +252,16 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
     :param d: spacing of bin centers for binned data, if supplied
               correction factor is used to correct for bias in
               estimation of r, in radians (!)
-    :param axis: compute along this dimension, default is 0
+    :param axis: compute along this dimension, default is None (across all dimensions)
     :param axial_correction: axial correction (2,3,4,...), default is 1
     :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: mean resultant length
 
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
 
     cmean = _complex_mean(alpha, w=w, axis=axis, axial_correction=axial_correction)
 
@@ -268,21 +274,22 @@ def resultant_vector_length(alpha, w=None, d=None, axis=0, axial_correction=1, c
         if axial_correction > 1:
             warnings.warn("Axial correction ignored for bias correction.")
         r *= d / 2 / np.sin(d / 2)
-    print(r)
     return r
 
 
-def _complex_mean(alpha, w=None, axis=0, axial_correction=1):
+def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     if w is None:
         w = np.ones_like(alpha)
     alpha = np.asarray(alpha)
-    assert w.shape == alpha.shape, "Dimensions of data and w do not match!"
+
+    assert w.shape == alpha.shape, "Dimensions of data " + str(alpha.shape) \
+                                   + " and w " +  str(w.shape) + " do not match! "
 
     return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)
 
 
 @bootstrap(2, 'linear')
-def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_iter=None):
+def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
     """
     Circular correlation coefficient for two circular random variables.
 
@@ -291,7 +298,7 @@ def corrcc(alpha1, alpha2, ci=None, axis=0, bootstrap_iter=None):
 
     :param alpha1: sample of angles in radians
     :param alpha2: sample of angles in radians
-    :param axis: correlation coefficient is computed along this dimension (default axis=0)
+    :param axis: correlation coefficient is computed along this dimension (default axis=None, across all dimensions)
     :param ci: if not None, confidence level is bootstrapped
     :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
     :return: correlation coefficient if ci=None, otherwise correlation
@@ -317,12 +324,17 @@ def center(*args, **kwargs):
 
     Each non-keyword argument is another data array that is centered.
 
-    :param axis: the mean is computed along this dimension (default axis=0).
+    :param axis: the mean is computed along this dimension (default axis=None).
                 **Must be used as a keyword argument!**
     :return: tuple of centered data arrays
 
     """
-    axis = kwargs.pop('axis', 0)
+
+    axis = kwargs.pop('axis', None)
+    if axis is None:
+        axis = 0
+        args = [a.ravel() for a in args]
+
 
     reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(args[0].shape)))
     if len(args) == 1:
@@ -373,7 +385,7 @@ def percentile(alpha, q, q0, axis=None, ci=None, bootstrap_iter=None):
 
 
 @bootstrap(1, 'linear')
-def var(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes circular variance for circular data (equ. 26.17/18, Zar).
     :param alpha: sample of angles in radian
@@ -381,13 +393,17 @@ def var(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
     :param d:     spacing of bin centers for binned data, if supplied
                   correction factor is used to correct for bias in
                   estimation of r
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None (across all dimensions)
     :param bootstrap_iter: if not None, confidence level is bootstrapped
     :param ci:   number of bootstrap iterations (number of samples if None)
     :return:      circular variance 1 - resultant vector length
 
     References: [Zar2009]_
     """
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
+
     if w is None:
         w = np.ones_like(alpha)
 
@@ -399,7 +415,7 @@ def var(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
     return 1 - r
 
 @bootstrap(1, 'linear')
-def std(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes circular standard deviation for circular data.
     :param alpha: sample of angles in radian
@@ -407,13 +423,16 @@ def std(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
     :param d:     spacing of bin centers for binned data, if supplied
                   correction factor is used to correct for bias in
                   estimation of r
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None (across all dimensions)
     :param bootstrap_iter: if not None, confidence level is bootstrapped
     :param ci:   number of bootstrap iterations (number of samples if None)
     :return:      circular variance 1 - resultant vector length
 
     References: [Zar2009]_
     """
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
     if w is None:
         w = np.ones_like(alpha)
 
@@ -426,7 +445,7 @@ def std(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
 
 
 @bootstrap(1, 'linear')
-def avar(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes angular variance for circular data (equ. 26.17/18, Zar).
 
@@ -435,13 +454,16 @@ def avar(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
     :param d:     spacing of bin centers for binned data, if supplied
                   correction factor is used to correct for bias in
                   estimation of r
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None (across all dimensions)
     :param bootstrap_iter: if not None, confidence level is bootstrapped
     :param ci:   number of bootstrap iterations (number of samples if None)
     :return:      2 * circular variance
 
     References: [Zar2009]_
     """
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
 
     if w is None:
         w = np.ones_like(alpha)
@@ -449,7 +471,7 @@ def avar(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
     return 2 * var(alpha, w=w, d=d, axis=axis, ci=None)
 
 @bootstrap(1, 'linear')
-def astd(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
+def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes angular standard deviation for circular data.
 
@@ -458,13 +480,16 @@ def astd(alpha, w=None, d=None, axis=0, ci=None, bootstrap_iter=None):
     :param d:     spacing of bin centers for binned data, if supplied
                   correction factor is used to correct for bias in
                   estimation of r
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None (across all dimensions)
     :param bootstrap_iter: if not None, confidence level is bootstrapped
     :param ci:   number of bootstrap iterations (number of samples if None)
     :return:      2 * circular variance
 
     References: [Zar2009]_
     """
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
 
     if w is None:
         w = np.ones_like(alpha)
