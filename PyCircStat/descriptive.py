@@ -285,7 +285,7 @@ def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     alpha = np.asarray(alpha)
 
     assert w.shape == alpha.shape, "Dimensions of data " + str(alpha.shape) \
-                                   + " and w " +  str(w.shape) + " do not match! "
+                                   + " and w " + str(w.shape) + " do not match! "
 
     return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)
 
@@ -337,12 +337,12 @@ def center(*args, **kwargs):
         axis = 0
         args = [a.ravel() for a in args]
 
-
     reshaper = tuple(slice(None, None) if i != axis else np.newaxis for i in range(len(args[0].shape)))
     if len(args) == 1:
         return args[0] - mean(args[0], axis=axis)
     else:
         return tuple([a - mean(a, axis=axis)[reshaper] for a in args if type(a) == np.ndarray])
+
 
 @mod2pi
 @bootstrap(1, 'circular')
@@ -414,8 +414,8 @@ def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     r = resultant_vector_length(alpha, w=w, d=d, axis=axis)
 
-
     return 1 - r
+
 
 @bootstrap(1, 'linear')
 def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
@@ -444,8 +444,7 @@ def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     r = resultant_vector_length(alpha, w=w, d=d, axis=axis)
 
-
-    return np.sqrt(-2*np.log(r))
+    return np.sqrt(-2 * np.log(r))
 
 
 @bootstrap(1, 'linear')
@@ -474,6 +473,7 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     return 2 * var(alpha, w=w, d=d, axis=axis, ci=None)
 
+
 @bootstrap(1, 'linear')
 def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
@@ -499,3 +499,49 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
         w = np.ones_like(alpha)
 
     return np.sqrt(avar(alpha, w=w, d=d, axis=axis, ci=None))
+
+
+def axial(alpha, p=1):
+    """
+    Transforms p-axial data to a common scale.
+
+    :param alpha: 	sample of angles in radians
+    :param p: number of modes
+    :return: Transforms p-axial data to a common scale.
+
+    References: [Fisher1995]_
+    """
+    return alpha * p % (2 * np.pi)
+
+def _corr(x,y, axis=None):
+    return np.mean(x*y, axis=axis)/np.std(x, axis=axis)/np.std(y, axis=axis)
+
+@bootstrap(1, 'linear')
+def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
+    """
+    Correlation coefficient between one circular and one linear random variable.
+
+
+    :param alpha: sample of angles in radians
+    :param x: sample of linear random variable
+    :param axis:  compute along this dimension, default is None (across all dimensions)
+    :param bootstrap_iter: if not None, confidence level is bootstrapped
+    :param ci:   number of bootstrap iterations (number of samples if None)
+    :return: correlation coefficient
+    """
+    assert alpha.shape == x.shape, "Dimensions of alpha and x must match"
+
+    if axis is None:
+        alpha = alpha.ravel()
+        x = x.ravel()
+        axis = 0
+
+    n = alpha.shape[axis]
+
+    # compute correlation coefficent for sin and cos independently
+    rxs = _corr(x, np.sin(alpha), axis=axis)
+    rxc = _corr(x, np.cos(alpha), axis=axis)
+    rcs = _corr(np.sin(alpha), np.cos(alpha))
+
+    # compute angular-linear correlation (equ. 27.47)
+    return np.sqrt((rxc ** 2 + rxs ** 2 - 2 * rxc * rxs * rcs) / (1 - rcs ** 2))

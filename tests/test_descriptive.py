@@ -10,7 +10,7 @@ import PyCircStat
 axis_1arg_test_funcs = [PyCircStat.astd, PyCircStat.avar, PyCircStat.mean, PyCircStat.median,
                     PyCircStat.resultant_vector_length, PyCircStat.std, PyCircStat.var]
 
-axis_2arg_test_funcs = [PyCircStat.corrcc]
+axis_2arg_test_funcs = [PyCircStat.corrcc, PyCircStat.corrcl]
 
 def test_axis_1arg():
     data = np.random.rand(2,3,5)*np.pi
@@ -236,4 +236,12 @@ def test_corrcc_ci_2d():
     assert_allclose(out1,exp1)
     assert_allclose(out2,exp2)
     assert_allclose(out3,exp3)
+
+def test_corrcl():
+    data1 = np.random.rand(50000)*2*np.pi
+    data2 = np.random.randn(50000)
+    assert_allclose(PyCircStat.corrcc(data1, data2), 0., rtol=3*1e-2, atol=3*1e-2)
+
+
+
 
