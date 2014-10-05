@@ -1,3 +1,4 @@
+from functools import wraps
 import numpy as np
 from PyCircStat import CI
 
@@ -9,6 +10,7 @@ def mod2pi(f):
     The decorated function must either return a tuple of numpy.ndarrays or a
     numpy.ndarray itself.
     """
+    @wraps(f)
     def return_func(*args, **kwargs):
         ret = f(*args, **kwargs)
 

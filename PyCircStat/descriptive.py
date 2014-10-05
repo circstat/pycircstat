@@ -1,6 +1,7 @@
 """
 Descriptive statistical functions
 """
+from functools import wraps
 import itertools
 
 import numpy as np
@@ -51,6 +52,7 @@ class bootstrap:
 
     def __call__(self, f):
 
+        @wraps(f)
         def wrapped_f(*args, **kwargs):
             ci = self._get_var(f, 'ci', None, args, kwargs, remove=True)
             bootstrap_iter = self._get_var(f, 'bootstrap_iter', None, args, kwargs, remove=True)
@@ -388,6 +390,7 @@ def percentile(alpha, q, q0, axis=None, ci=None, bootstrap_iter=None):
 def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes circular variance for circular data (equ. 26.17/18, Zar).
+
     :param alpha: sample of angles in radian
     :param w: 	  number of incidences in case of binned angle data
     :param d:     spacing of bin centers for binned data, if supplied
@@ -418,6 +421,7 @@ def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     """
     Computes circular standard deviation for circular data.
+
     :param alpha: sample of angles in radian
     :param w: 	  number of incidences in case of binned angle data
     :param d:     spacing of bin centers for binned data, if supplied
