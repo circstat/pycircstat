@@ -166,7 +166,7 @@ def pairwise_cdiff(alpha, beta=None):
 
     return np.angle(np.exp(1j * alpha[reshaper_alpha]) / np.exp(1j * beta[reshaper_beta]))
 
-
+@mod2pi
 def mean(alpha, w=None, ci=None, d=None, axis=None, axial_correction=1):
     """
     Compute mean direction of circular data.
@@ -240,7 +240,7 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=None):
     if not np.all(idx | idx2):
         warnings.warn('Requirements for confidence levels not met.')
 
-    return np.arccos(t / R)
+    return np.squeeze(np.arccos(t / R))
 
 
 @bootstrap(1, 'linear')
