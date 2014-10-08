@@ -97,10 +97,10 @@ def test_median():
         [3.73153000, 1.63904879, 4.03175622, 3.90422402, 4.61029613, 4.04117818, 5.79313473, 5.50863002, 5.81530225, 2.44973903],
         [2.12868554, 0.09073566, 0.05581025, 5.10673712, 1.68712454, 3.72915575, 4.45439608, 4.70694685, 3.58470730, 2.49742028]
     ])
-    m0 = np.array([2.93010777, 0.86489223, -1.09780942, -1.77770474, -3.13447497, -2.39801834, -1.15941990, -1.17539688, -1.58318053, 2.47357966])
-    m1 = np.array([-2.24671810, -1.24910966])
-    m11 = np.array([-2.24200713, -1.82878923])
-    mall = -2.2467
+    m0 = np.array([2.93010777, 0.86489223, -1.09780942, -1.77770474, -3.13447497, -2.39801834, -1.15941990, -1.17539688, -1.58318053, 2.47357966]) % (2*np.pi)
+    m1 = np.array([-2.24671810, -1.24910966]) % (2*np.pi)
+    m11 = np.array([-2.24200713, -1.82878923]) % (2*np.pi)
+    mall = -2.2467 % (2*np.pi)
     assert_allclose(PyCircStat.median(alpha, axis=1), m1)
     assert_allclose(PyCircStat.median(alpha[:,:-1], axis=1), m11)
     assert_allclose(PyCircStat.median(alpha, axis=0), m0)
@@ -214,7 +214,10 @@ def test_mean_ci_1d():
 
 def test_center():
     data = np.random.rand(1000)*2*np.pi
-    assert_allclose(PyCircStat.mean(PyCircStat.center(data)), 0., rtol=1e-3, atol=1e-3)
+    try:
+        assert_allclose(PyCircStat.mean(PyCircStat.center(data)), 0, rtol=1e-3, atol=1e-3)
+    except:
+        assert_allclose(PyCircStat.mean(PyCircStat.center(data)), 2*np.pi, rtol=1e-3, atol=1e-3)
 
 def test_corrcc():
     data1 = np.random.rand(50000)*2*np.pi
