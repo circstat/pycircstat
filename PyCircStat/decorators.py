@@ -1,6 +1,6 @@
 from functools import wraps
 import numpy as np
-from PyCircStat import CI
+from pycircstat import CI
 
 
 def mod2pi(f):

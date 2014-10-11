@@ -7,9 +7,9 @@ import itertools
 import numpy as np
 from scipy import stats
 import warnings
-from PyCircStat import CI
-from PyCircStat.iterators import nd_bootstrap
-from PyCircStat.decorators import mod2pi
+from pycircstat import CI
+from pycircstat.iterators import nd_bootstrap
+from pycircstat.decorators import mod2pi
 
 
 class bootstrap:

@@ -5,12 +5,12 @@ import numpy as np
 from numpy.testing import assert_allclose
 from nose.tools import assert_equal, assert_true
 
-import PyCircStat
+import pycircstat
 
-axis_1arg_test_funcs = [PyCircStat.astd, PyCircStat.avar, PyCircStat.mean, PyCircStat.median,
-                    PyCircStat.resultant_vector_length, PyCircStat.std, PyCircStat.var]
+axis_1arg_test_funcs = [pycircstat.astd, pycircstat.avar, pycircstat.mean, pycircstat.median,
+                    pycircstat.resultant_vector_length, pycircstat.std, pycircstat.var]
 
-axis_2arg_test_funcs = [PyCircStat.corrcc, PyCircStat.corrcl]
+axis_2arg_test_funcs = [pycircstat.corrcc, pycircstat.corrcl]
 
 def test_axis_1arg():
     data = np.random.rand(2,3,5)*np.pi
@@ -37,55 +37,55 @@ def test_axis_2arg():
 def test_var():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
                       4.77054777, 1.51736933, 0.72727580])
-    s = PyCircStat.var(data)
+    s = pycircstat.var(data)
     assert_allclose(0.65842, s, atol=0.001, rtol=0.001)
 
 
 def test_avar():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
                       4.77054777, 1.51736933, 0.72727580])
-    s = PyCircStat.avar(data)
+    s = pycircstat.avar(data)
     assert_allclose(1.3168, s, atol=0.001, rtol=0.001)
 
 def test_std():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
                       4.77054777, 1.51736933, 0.72727580])
-    s = PyCircStat.std(data)
+    s = pycircstat.std(data)
     assert_allclose(1.4657, s, atol=0.001, rtol=0.001)
 
 
 def test_astd():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
                       4.77054777, 1.51736933, 0.72727580])
-    s = PyCircStat.astd(data)
+    s = pycircstat.astd(data)
     assert_allclose(1.1475, s, atol=0.001, rtol=0.001)
 
 
 def test_percentile():
     alpha = np.linspace(0,2*np.pi,1./0.0001)
     s = np.random.rand()*2*np.pi
-    q = PyCircStat.percentile(alpha, 5, q0=s)
+    q = pycircstat.percentile(alpha, 5, q0=s)
     #print(q, s+0.05*np.pi*2)
     assert_allclose(q, (s+0.05*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
 
 def test_percentile_2q():
     alpha = np.linspace(0,2*np.pi,1./0.0001)
     s = np.random.rand()*2*np.pi
-    q = PyCircStat.percentile(alpha, [5,10], q0=s)
+    q = pycircstat.percentile(alpha, [5,10], q0=s)
     #print(q, s+np.array([0.05,0.1])*np.pi*2)
     assert_allclose(q, (s+np.array([0.05,0.1])*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
 
 def test_percentile_2d():
     alpha = np.linspace(0,2*np.pi,1./0.0001)[None,:]*np.ones((2,1))
     s = np.random.rand(2)*2*np.pi
-    q = PyCircStat.percentile(alpha, 5, q0=s, axis=1)
+    q = pycircstat.percentile(alpha, 5, q0=s, axis=1)
     #print(q,  (s+0.05*np.pi*2) % (2*np.pi))
     assert_allclose(q,  (s+0.05*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
 
 def test_percentile_2d_2q():
     alpha = np.linspace(0,2*np.pi,1./0.0001)[None,:]*np.ones((2,1))
     s = np.random.rand(2)*2*np.pi
-    q = PyCircStat.percentile(alpha, [5, 10], q0=s, axis=1)
+    q = pycircstat.percentile(alpha, [5, 10], q0=s, axis=1)
     #print(q, s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)
     assert_allclose(q,  (s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)%(2*np.pi), atol=0.001, rtol=0.001)
 
@@ -101,19 +101,19 @@ def test_median():
     m1 = np.array([-2.24671810, -1.24910966]) % (2*np.pi)
     m11 = np.array([-2.24200713, -1.82878923]) % (2*np.pi)
     mall = -2.2467 % (2*np.pi)
-    assert_allclose(PyCircStat.median(alpha, axis=1), m1)
-    assert_allclose(PyCircStat.median(alpha[:,:-1], axis=1), m11)
-    assert_allclose(PyCircStat.median(alpha, axis=0), m0)
-    assert_allclose(PyCircStat.median(alpha), mall, atol=1e-4)
+    assert_allclose(pycircstat.median(alpha, axis=1), m1)
+    assert_allclose(pycircstat.median(alpha[:,:-1], axis=1), m11)
+    assert_allclose(pycircstat.median(alpha, axis=0), m0)
+    assert_allclose(pycircstat.median(alpha), mall, atol=1e-4)
 
 
 def test_median_ci():
     alpha = np.ones((2,10))
     m1 = np.ones(2)
     m0 = np.ones(10)
-    mout1, ci_1 = PyCircStat.median(alpha, axis=1, ci=.8)
-    mout0, ci_0 = PyCircStat.median(alpha, axis=0, ci=.8)
-    moutall, ci_all = PyCircStat.median(alpha, axis=0, ci=.8)
+    mout1, ci_1 = pycircstat.median(alpha, axis=1, ci=.8)
+    mout0, ci_0 = pycircstat.median(alpha, axis=0, ci=.8)
+    moutall, ci_all = pycircstat.median(alpha, axis=0, ci=.8)
 
     assert_allclose(mout1, m1)
     assert_allclose(mout0, m0)
@@ -129,7 +129,7 @@ def test_median_ci():
 
 def test_circular_distance():
     a = np.array([4.85065953, 0.79063862, 1.35698570])
-    assert_allclose(PyCircStat.cdiff(a,a), np.zeros_like(a))
+    assert_allclose(pycircstat.cdiff(a,a), np.zeros_like(a))
 
 def test_pairwise_circular_distance():
     a = np.array([4.85065953, 0.79063862, 1.35698570])
@@ -139,13 +139,13 @@ def test_pairwise_circular_distance():
         [1.30290899, -1.23362610, ],
         [1.86925607, -0.66727901, ]
     ])
-    assert_allclose(PyCircStat.pairwise_cdiff(a,b), ret)
+    assert_allclose(pycircstat.pairwise_cdiff(a,b), ret)
 
 def test_mean_constant_data():
     data = np.ones(10)
 
     # We cannot use `assert_equal`, due to numerical rounding errors.
-    assert_allclose(PyCircStat.mean(data), 1.0)
+    assert_allclose(pycircstat.mean(data), 1.0)
 
 
 def test_mean():
@@ -153,22 +153,22 @@ def test_mean():
                       4.77054777, 1.51736933, 0.72727580])
 
     # We cannot use `assert_equal`, due to numerical rounding errors.
-    assert_allclose(PyCircStat.mean(data), 1.35173983)
+    assert_allclose(pycircstat.mean(data), 1.35173983)
 
 def test_mean_axial():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057, 1.54256458, 5.19290675, 2.18474784,
                       4.77054777, 1.51736933, 0.72727580])
 
     # We cannot use `assert_equal`, due to numerical rounding errors.
-    assert_allclose(PyCircStat.mean(data, axial_correction=3), 0.95902619)
+    assert_allclose(pycircstat.mean(data, axial_correction=3), 0.95902619)
 
 def test_resultant_vector_length():
     data = np.ones(10)
-    assert_allclose(PyCircStat.resultant_vector_length(data), 1.0)
+    assert_allclose(pycircstat.resultant_vector_length(data), 1.0)
 
 def test_resultant_vector_length_axis():
     data = np.ones((10,2))
-    assert_allclose(PyCircStat.resultant_vector_length(data, axis=1), np.ones(10))
+    assert_allclose(pycircstat.resultant_vector_length(data, axis=1), np.ones(10))
 
 
 def test_mean_ci_limits():
@@ -181,8 +181,8 @@ def test_mean_ci_limits():
         ])
     out1 = np.array([0.76976, 0.50149])
     out2 = np.array([0.17081, 0.72910, 0.10911, 0.24385, 0.95426])
-    assert_allclose(PyCircStat.mean_ci_limits(data, ci=0.8, axis=0), out1, rtol=1e-4)
-    assert_allclose(PyCircStat.mean_ci_limits(data, ci=0.8, axis=1), out2, rtol=1e-4)
+    assert_allclose(pycircstat.mean_ci_limits(data, ci=0.8, axis=0), out1, rtol=1e-4)
+    assert_allclose(pycircstat.mean_ci_limits(data, ci=0.8, axis=1), out2, rtol=1e-4)
 
 def test_mean_ci_2d():
     data = np.array([
@@ -196,7 +196,7 @@ def test_mean_ci_2d():
     muminus = np.array([np.NaN, 0.89931])
     mu = np.array([1.6537, 1.7998])
 
-    mu_tmp, (muminus_tmp, muplus_tmp) = PyCircStat.mean(data, ci=0.95, axis=0)
+    mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95, axis=0)
     assert_allclose(muplus, muplus_tmp, rtol=1e-4)
     assert_allclose(muminus, muminus_tmp, rtol=1e-4)
     assert_allclose(mu, mu_tmp, rtol=1e-4)
@@ -207,7 +207,7 @@ def test_mean_ci_1d():
     muminus = 0.89931
     mu = 1.7998
 
-    mu_tmp, (muminus_tmp, muplus_tmp) = PyCircStat.mean(data, ci=0.95)
+    mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95)
     assert_allclose(muplus, muplus_tmp, rtol=1e-4)
     assert_allclose(muminus, muminus_tmp, rtol=1e-4)
     assert_allclose(mu, mu_tmp, rtol=1e-4)
@@ -215,27 +215,27 @@ def test_mean_ci_1d():
 def test_center():
     data = np.random.rand(1000)*2*np.pi
     try:
-        assert_allclose(PyCircStat.mean(PyCircStat.center(data)), 0, rtol=1e-3, atol=1e-3)
+        assert_allclose(pycircstat.mean(pycircstat.center(data)), 0, rtol=1e-3, atol=1e-3)
     except:
-        assert_allclose(PyCircStat.mean(PyCircStat.center(data)), 2*np.pi, rtol=1e-3, atol=1e-3)
+        assert_allclose(pycircstat.mean(pycircstat.center(data)), 2*np.pi, rtol=1e-3, atol=1e-3)
 
 def test_corrcc():
     data1 = np.random.rand(50000)*2*np.pi
     data2 = np.random.rand(50000)*2*np.pi
-    assert_allclose(PyCircStat.corrcc(data1, data2), 0., rtol=3*1e-2, atol=3*1e-2)
+    assert_allclose(pycircstat.corrcc(data1, data2), 0., rtol=3*1e-2, atol=3*1e-2)
 
 def test_corrcc_ci():
     data1 = np.random.rand(200)*2*np.pi
     data2 = np.asarray(data1)
-    exp = (1., PyCircStat.CI(1.,1.))
-    assert_equal(PyCircStat.corrcc(data1, data2, ci=0.95), exp)
+    exp = (1., pycircstat.CI(1.,1.))
+    assert_equal(pycircstat.corrcc(data1, data2, ci=0.95), exp)
 
 def test_corrcc_ci_2d():
     data1 = np.random.rand(2,200)*np.pi
     data2 = np.asarray(data1)
 
-    out1, (out2, out3) = PyCircStat.corrcc(data1, data2, ci=0.95, axis=1)
-    exp1, (exp2, exp3) = (np.ones(2), PyCircStat.CI(np.ones(2), np.ones(2)))
+    out1, (out2, out3) = pycircstat.corrcc(data1, data2, ci=0.95, axis=1)
+    exp1, (exp2, exp3) = (np.ones(2), pycircstat.CI(np.ones(2), np.ones(2)))
     assert_allclose(out1,exp1)
     assert_allclose(out2,exp2)
     assert_allclose(out3,exp3)
@@ -243,7 +243,7 @@ def test_corrcc_ci_2d():
 def test_corrcl():
     data1 = np.random.rand(50000)*2*np.pi
     data2 = np.random.randn(50000)
-    assert_allclose(PyCircStat.corrcc(data1, data2), 0., rtol=3*1e-2, atol=3*1e-2)
+    assert_allclose(pycircstat.corrcc(data1, data2), 0., rtol=3*1e-2, atol=3*1e-2)
 
 
 
