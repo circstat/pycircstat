@@ -290,35 +290,6 @@ def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     return (w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) / np.sum(w, axis=axis)
 
 
-@bootstrap(2, 'linear')
-def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
-    """
-    Circular correlation coefficient for two circular random variables.
-
-    If a confidence level is specified, confidence limits are bootstrapped. The number of bootstrapping
-    iterations is min(number of data points along axis, bootstrap_max_iter).
-
-    :param alpha1: sample of angles in radians
-    :param alpha2: sample of angles in radians
-    :param axis: correlation coefficient is computed along this dimension (default axis=None, across all dimensions)
-    :param ci: if not None, confidence level is bootstrapped
-    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
-    :return: correlation coefficient if ci=None, otherwise correlation
-             coefficient with lower and upper confidence limits
-
-    References: [Jammalamadaka2001]_
-    """
-    assert alpha1.shape == alpha2.shape, 'Input dimensions do not match.'
-
-    # center data on circular mean
-    alpha1, alpha2 = center(alpha1, alpha2, axis=axis)
-
-    # compute correlation coeffcient from p. 176
-    num = np.sum(np.sin(alpha1) * np.sin(alpha2), axis=axis)
-    den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
-    return num / den
-
-
 @mod2pi
 def center(*args, **kwargs):
     """
@@ -403,6 +374,9 @@ def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     References: [Zar2009]_
     """
+     # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
+
+
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
@@ -434,6 +408,8 @@ def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     References: [Zar2009]_
     """
+     # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
+
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
@@ -464,6 +440,8 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     References: [Zar2009]_
     """
+    # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
+
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
@@ -471,6 +449,7 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if w is None:
         w = np.ones_like(alpha)
 
+    # TODO: This seems not like a proper handling of the ci/bootstrap_iter arguments to me...
     return 2 * var(alpha, w=w, d=d, axis=axis, ci=None)
 
 
@@ -491,6 +470,9 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
 
     References: [Zar2009]_
     """
+    # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
+
+
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
@@ -498,6 +480,7 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if w is None:
         w = np.ones_like(alpha)
 
+    # TODO: This seems not like a proper handling of the ci/bootstrap_iter arguments to me...
     return np.sqrt(avar(alpha, w=w, d=d, axis=axis, ci=None))
 
 
@@ -529,6 +512,9 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
     :param ci:   number of bootstrap iterations (number of samples if None)
     :return: correlation coefficient
     """
+
+     # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
+
     assert alpha.shape == x.shape, "Dimensions of alpha and x must match"
 
     if axis is None:
@@ -538,10 +524,39 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
 
     n = alpha.shape[axis]
 
-    # compute correlation coefficent for sin and cos independently
+    # compute correlation coefficient for sin and cos independently
     rxs = _corr(x, np.sin(alpha), axis=axis)
     rxc = _corr(x, np.cos(alpha), axis=axis)
     rcs = _corr(np.sin(alpha), np.cos(alpha))
 
     # compute angular-linear correlation (equ. 27.47)
     return np.sqrt((rxc ** 2 + rxs ** 2 - 2 * rxc * rxs * rcs) / (1 - rcs ** 2))
+
+
+@bootstrap(2, 'linear')
+def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
+    """
+    Circular correlation coefficient for two circular random variables.
+
+    If a confidence level is specified, confidence limits are bootstrapped. The number of bootstrapping
+    iterations is min(number of data points along axis, bootstrap_max_iter).
+
+    :param alpha1: sample of angles in radians
+    :param alpha2: sample of angles in radians
+    :param axis: correlation coefficient is computed along this dimension (default axis=None, across all dimensions)
+    :param ci: if not None, confidence level is bootstrapped
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
+    :return: correlation coefficient if ci=None, otherwise correlation
+             coefficient with lower and upper confidence limits
+
+    References: [Jammalamadaka2001]_
+    """
+    assert alpha1.shape == alpha2.shape, 'Input dimensions do not match.'
+
+    # center data on circular mean
+    alpha1, alpha2 = center(alpha1, alpha2, axis=axis)
+
+    # compute correlation coeffcient from p. 176
+    num = np.sum(np.sin(alpha1) * np.sin(alpha2), axis=axis)
+    den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) * np.sum(np.sin(alpha2) ** 2, axis=axis))
+    return num / den
