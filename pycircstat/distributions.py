@@ -1,6 +1,6 @@
 from scipy.stats import rv_continuous
 import numpy as np
-from PyCircStat import mod2pi
+from pycircstat import mod2pi
 
 
 class cardioid_gen(rv_continuous):
@@ -26,8 +26,8 @@ class cardioid_gen(rv_continuous):
     **Example:**
 
     ..code::
-    
-        from PyCircStat.distributions import cardioid
+
+        from pycircstat.distributions import cardioid
         import matplotlib.pyplot as plt
         import numpy as np
         mu, rho = np.pi, .2
@@ -85,7 +85,7 @@ class triangular_gen(rv_continuous):
 
     ..code::
 
-         from PyCircStat.distributions import triangular
+         from pycircstat.distributions import triangular
          import matplotlib.pyplot as plt
          import numpy as np
          rho = .4

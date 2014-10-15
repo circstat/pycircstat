@@ -9,7 +9,7 @@ setup(
     #license = "MIT",
     keywords = "statistics",
     #url = "http://packages.python.org/PyCircStat",
-    packages=['PyCircStat', 'tests'],
+    packages=['pycircstat', 'tests'],
     #long_description=read('README'),
     classifiers=[
         "Development Status :: 3 - Alpha",

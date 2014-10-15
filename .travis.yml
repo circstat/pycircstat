@@ -11,4 +11,4 @@ before_install:
 # Because of this, we print every 100th line.
 install: pip install numpy scipy nose python-coveralls nose-cov | sed -n '0~100p'
 # command to run tests
-script: nosetests --with-cov --cov PyCircStat
+script: nosetests --with-cov --cov pycircstat
