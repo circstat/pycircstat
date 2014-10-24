@@ -368,13 +368,12 @@ def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
                   correction factor is used to correct for bias in
                   estimation of r
     :param axis:  compute along this dimension, default is None (across all dimensions)
-    :param bootstrap_iter: if not None, confidence level is bootstrapped
-    :param ci:   number of bootstrap iterations (number of samples if None)
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
+    :param ci:   if not None, confidence level is bootstrapped
     :return:      circular variance 1 - resultant vector length
 
     References: [Zar2009]_
     """
-     # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
 
 
     if axis is None:
@@ -402,13 +401,12 @@ def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
                   correction factor is used to correct for bias in
                   estimation of r
     :param axis:  compute along this dimension, default is None (across all dimensions)
-    :param bootstrap_iter: if not None, confidence level is bootstrapped
-    :param ci:   number of bootstrap iterations (number of samples if None)
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
+    :param ci:   if not None, confidence level is bootstrapped
     :return:      circular variance 1 - resultant vector length
 
     References: [Zar2009]_
     """
-     # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
 
     if axis is None:
         axis = 0
@@ -434,13 +432,12 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
                   correction factor is used to correct for bias in
                   estimation of r
     :param axis:  compute along this dimension, default is None (across all dimensions)
-    :param bootstrap_iter: if not None, confidence level is bootstrapped
-    :param ci:   number of bootstrap iterations (number of samples if None)
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
+    :param ci:   if not None, confidence level is bootstrapped
     :return:      2 * circular variance
 
     References: [Zar2009]_
     """
-    # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
 
     if axis is None:
         axis = 0
@@ -449,7 +446,6 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if w is None:
         w = np.ones_like(alpha)
 
-    # TODO: This seems not like a proper handling of the ci/bootstrap_iter arguments to me...
     return 2 * var(alpha, w=w, d=d, axis=axis, ci=None)
 
 
@@ -464,14 +460,13 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
                   correction factor is used to correct for bias in
                   estimation of r
     :param axis:  compute along this dimension, default is None (across all dimensions)
-    :param bootstrap_iter: if not None, confidence level is bootstrapped
-    :param ci:   number of bootstrap iterations (number of samples if None)
+    :param bootstrap_iter: number of bootstrap iterations (number of samples if None)
+    :param ci:   if not None, confidence level is bootstrapped
     :return:      2 * circular variance
 
     References: [Zar2009]_
     """
-    # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
-
+ 
 
     if axis is None:
         axis = 0
@@ -480,7 +475,6 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if w is None:
         w = np.ones_like(alpha)
 
-    # TODO: This seems not like a proper handling of the ci/bootstrap_iter arguments to me...
     return np.sqrt(avar(alpha, w=w, d=d, axis=axis, ci=None))
 
 
@@ -508,12 +502,11 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
     :param alpha: sample of angles in radians
     :param x: sample of linear random variable
     :param axis:  compute along this dimension, default is None (across all dimensions)
-    :param bootstrap_iter: if not None, confidence level is bootstrapped
-    :param ci:   number of bootstrap iterations (number of samples if None)
+    :param bootstrap_iter:  number of bootstrap iterations (number of samples if None)
+    :param ci: if not None, confidence level is bootstrapped  
     :return: correlation coefficient
     """
 
-     # TODO: Please check: Are the descriptions for ci and bootstrap_iter swapped?
 
     assert alpha.shape == x.shape, "Dimensions of alpha and x must match"
 
@@ -521,8 +514,6 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
         alpha = alpha.ravel()
         x = x.ravel()
         axis = 0
-
-    n = alpha.shape[axis]
 
     # compute correlation coefficient for sin and cos independently
     rxs = _corr(x, np.sin(alpha), axis=axis)
