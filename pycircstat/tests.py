@@ -4,7 +4,7 @@ Statistical tests
 import numpy as np
 from scipy import stats
 import warnings
-from pycircstat import descriptive 
+from pycircstat import descriptive
 
 def rayleigh(alpha, w=None, d=None, axis=0):
     """
