@@ -1,4 +1,4 @@
-PyCircStat
+pycircstat
 ==========
 
 Toolbox for circular statistics with Python
