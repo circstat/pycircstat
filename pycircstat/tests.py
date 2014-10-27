@@ -4,7 +4,7 @@ Statistical tests
 import numpy as np
 from scipy import stats
 import warnings
-from pycircstat import descriptive
+from pycircstat import descriptive 
 
 def rayleigh(alpha, w=None, d=None, axis=0):
     """
@@ -39,7 +39,7 @@ def rayleigh(alpha, w=None, d=None, axis=0):
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
     
 
-    r = resultant_vector_length(alpha, w=w, d=d, axis=axis)
+    r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
     n = np.sum(w)
     
     # compute Rayleigh's R (equ. 27.1)
