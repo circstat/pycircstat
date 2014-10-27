@@ -26,8 +26,10 @@ install:
   # Replace dep1 dep2 ... with your dependencies
   - conda create -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy setuptools pip
   - source activate test-environment
-  - pip install nose nose-cov
+  - pip install nose nose-cov python-coveralls
   - conda info -a
 # command to run tests
 script:
-  - nosetests --with-cov --cov pycircstat
+  - nosetests --with-coverage --cover-package=pycircstat
+after_success:
+  - coveralls
