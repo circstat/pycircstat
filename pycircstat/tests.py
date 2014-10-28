@@ -55,7 +55,7 @@ def rayleigh(alpha, w=None, d=None, axis=0):
     return pval, z
 
 
-def omnibus(alpha, w=None, sz=utils.ang2rad(1), axis=0):
+def omnibus(alpha, w=None, sz=np.radians(1), axis=0):
     """
     Computes omnibus test for non-uniformity of circular data. The test is also 
     known as Hodges-Ajne test.
@@ -87,8 +87,6 @@ def omnibus(alpha, w=None, sz=utils.ang2rad(1), axis=0):
 
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
     
-    # this is clearly not correct
-    # repeated application creates very weird results
     alpha = alpha % (2*np.pi)
     n = np.sum(w);
     dg = np.arange(0,np.pi,utils.ang2rad(1))
@@ -97,8 +95,8 @@ def omnibus(alpha, w=None, sz=utils.ang2rad(1), axis=0):
     m1 = np.zeros_like(dg)
     m2 = np.zeros_like(dg)   
     
-    for i in range(0,dg.shape[0]):
-        m1[i] = np.dot(np.logical_and(alpha>dg[i],alpha < np.pi+dg[i]),w)
+    for i,dg_val in enumerate(dg):
+        m1[i] = np.sum(w[(alpha>dg_val) & (alpha < np.pi+dg_val)])
         m2[i] = n - m1[i]
         
     m = np.hstack((m1,m2)).min()
