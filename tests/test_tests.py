@@ -35,7 +35,7 @@ def test_raospacing():
         0.20612467,  1.38484181,  1.72546928,  3.33570062,  3.96191276])
     p, U, Uc = pycircstat.tests.raospacing(data)
     assert_allclose(0.001, p, atol=0.0001, rtol=0.001)    
-    assert_allclose(24777.35, U, atol=0.001, rtol=0.001)    
+    assert_allclose(233.7789, U, atol=0.001, rtol=0.001)    
     assert_allclose(192.17, Uc, atol=0.001, rtol=0.001)    
     
 
