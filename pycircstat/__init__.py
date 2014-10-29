@@ -5,4 +5,4 @@ CI = namedtuple('confidence_interval', ['lower','upper'])
 
 from .descriptive import *
 from .tests import *
-
+from .utils import *
