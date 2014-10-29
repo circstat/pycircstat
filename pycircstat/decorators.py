@@ -31,3 +31,58 @@ def mod2pi(f):
 
     return return_func
 
+def get_var(f, varnames, args, kwargs, remove=False):
+    fvarnames = f.__code__.co_varnames
+
+    ret = {}
+    for varname in varnames:
+        if varname in fvarnames:
+            var_pos = fvarnames.index(varname)
+        else:
+            raise ValueError('Function %s does not have variable %s.' % (f.__name__, varnames))
+
+        if len(args) >= var_pos + 1:
+            ret[varname] = args[var_pos]
+            if remove:
+                del args[var_pos]
+        elif varname in kwargs:
+            ret[varname] = kwargs[varname]
+            if remove:
+                del kwargs[varname]
+        else:
+            raise ValueError('%s was not specified in  %s.' % (varnames, f.__name__))
+
+    return ret
+
+
+class swap2zeroaxis:
+
+    def __init__(self, inputs, out_idx):
+        self.inputs = inputs
+        self.out_idx = out_idx
+
+
+    def __call__(self, f):
+
+        @wraps(f)
+        def wrapped_f(*args, **kwargs):
+            to_swap = get_var(f, self.inputs, args, kwargs, remove=True)
+
+            try:
+                axis = get_var(f, ['axis'], args, kwargs)
+            except ValueError:
+                axis = None
+
+            if axis is not None:
+                for k, v in to_swap:
+                    kwargs[k] = v.swapaxes(0, axis)
+            else:
+                for k, v in to_swap:
+                    kwargs[k] = v.ravel()
+
+            outputs = f(*args, **kwargs)
+
+            # TODO: swap back
+            return outputs
+
+        return wrapped_f
