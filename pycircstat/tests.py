@@ -128,10 +128,8 @@ def raospacing(alpha, axis=None):
     locally.
 
     Due to the complexity of the distribution of the test statistic, we
-    resort to the tables published by
-       Russell, Gerald S. and Levitin, Daniel J.(1995)
-       'An expanded table of probability values for rao's spacing test'
-       Communications in Statistics - Simulation and Computation
+    resort to the tables published by Russel and Levitin (references below).
+
     Therefore the reported p-value is the smallest alpha level at which the
     test would still be significant. If the test is not significant at the
     alpha=0.1 level, we return the critical value for alpha = 0.05 and p =
@@ -144,7 +142,7 @@ def raospacing(alpha, axis=None):
     :return U:    test statistic
     :return Uc:   critical value at the p-value returned
 
-    References: [Batschelet1981]_, [Russel_Levitin1995]_
+    References: [Batschelet1981]_, [RusselLevitin1995]_
     """
 
     if axis is None:
@@ -170,13 +168,13 @@ def raospacing(alpha, axis=None):
     U = .5*U;
 
     # get critical value from table
-    pval, Uc = critical_value_raospacing(n,U)
+    pval, Uc = _critical_value_raospacing(n,U)
 
 
     return pval, U, Uc
 
 
-def critical_value_raospacing(n,U):
+def _critical_value_raospacing(n,U):
     # Table II from Russel and Levitin, 1995
 
     alpha_level = np.array([0.001, .01, .05, .10]);

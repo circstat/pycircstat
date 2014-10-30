@@ -21,3 +21,31 @@ def test_swap2zeroaxis():
     assert_allclose(xx, np.mean(x[:,::2,...], axis=1))
     assert_allclose(yy, np.mean(y[:,::2,...], axis=1))
     assert_allclose(zz, z)
+
+    xx,yy,zz = dummy(x,y,z, 2)
+    assert_allclose(xx, np.mean(x[:,:,::2,...], axis=2))
+    assert_allclose(yy, np.mean(y[:,:,::2,...], axis=2))
+    assert_allclose(zz, z)
+
+    xx,yy,zz = dummy(x,y,z, axis=None)
+    assert_allclose(xx, np.mean(x.ravel()[::2]))
+    assert_allclose(yy, np.mean(y.ravel()[::2]))
+    assert_allclose(zz, z)
+
+    xx,yy,zz = dummy(x,y,z)
+    assert_allclose(xx, np.mean(x.ravel()[::2]))
+    assert_allclose(yy, np.mean(y.ravel()[::2]))
+    assert_allclose(zz, z)
+
+
+    @swap2zeroaxis(['x'], [0])
+    def dummy(x, axis=None):
+        return np.mean(x[::2,...], axis=0)
+
+    xx = dummy(x, axis=0)
+    assert_allclose(xx, np.mean(x[::2,...],axis=0))
+
+
+
+if __name__=="__main__":
+    test_swap2zeroaxis()
