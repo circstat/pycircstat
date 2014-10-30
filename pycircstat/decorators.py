@@ -31,7 +31,6 @@ def mod2pi(f):
 
     return return_func
 
-# TODO: change such that the indices and keys for varnames are returned
 def get_var(f, varnames, args, kwargs):
     fvarnames = f.__code__.co_varnames
 
