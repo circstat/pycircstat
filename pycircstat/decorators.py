@@ -31,6 +31,7 @@ def mod2pi(f):
 
     return return_func
 
+# TODO: change such that the indices and keys for varnames are returned
 def get_var(f, varnames, args, kwargs, remove=False):
     fvarnames = f.__code__.co_varnames
 
@@ -40,7 +41,6 @@ def get_var(f, varnames, args, kwargs, remove=False):
             var_pos = fvarnames.index(varname)
         else:
             raise ValueError('Function %s does not have variable %s.' % (f.__name__, varnames))
-
         if len(args) >= var_pos + 1:
             ret[varname] = args[var_pos]
             if remove:
@@ -52,7 +52,7 @@ def get_var(f, varnames, args, kwargs, remove=False):
         else:
             raise ValueError('%s was not specified in  %s.' % (varnames, f.__name__))
 
-    return ret
+    return ret, args
 
 
 class swap2zeroaxis:
@@ -66,23 +66,34 @@ class swap2zeroaxis:
 
         @wraps(f)
         def wrapped_f(*args, **kwargs):
-            to_swap = get_var(f, self.inputs, args, kwargs, remove=True)
 
+            to_swap, args2 = get_var(f, self.inputs, list(args), kwargs, remove=True)
             try:
                 axis = get_var(f, ['axis'], args, kwargs)
             except ValueError:
                 axis = None
 
             if axis is not None:
-                for k, v in to_swap:
+                for k, v in to_swap.items():
                     kwargs[k] = v.swapaxes(0, axis)
+                kwargs['axis'] = 0
             else:
                 for k, v in to_swap:
                     kwargs[k] = v.ravel()
+                kwargs['axis'] = None
 
-            outputs = f(*args, **kwargs)
+            outputs = f(*args2, **kwargs)
 
-            # TODO: swap back
-            return outputs
+            if len(self.out_idx) > 0 and axis is not None:
+                if isinstance(outputs, tuple):
+                    outputs = list(outputs)
+                    for i in self.out_idx:
+                        outputs[i] = outputs[i][np.newaxis, ...].swapaxes(0, axis).squeeze()
+
+                    return tuple(outputs)
+                else:
+                    if self.out_idx != [0]:
+                        raise ValueError("Single output argument and out_idx != [0] are inconsistent!")
+                    return outputs[np.newaxis, ...].swapaxes(0, axis).squeeze()
 
         return wrapped_f
