@@ -279,6 +279,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None, axial_correction=1
     return r
 
 
+
 def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     if w is None:
         w = np.ones_like(alpha)

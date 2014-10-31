@@ -1,6 +1,6 @@
 Iterators and Generators
 ========================
 
-.. automodule:: PyCircStat.iterators
+.. automodule:: pycircstat.iterators
     :members:
 

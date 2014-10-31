@@ -1,6 +1,6 @@
 Decorators
 ==========
 
-.. automodule:: PyCircStat.decorators
+.. automodule:: pycircstat.decorators
     :members:
 

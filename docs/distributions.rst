@@ -1,6 +1,6 @@
 Circular Distributions
 ======================
 
-.. automodule:: PyCircStat.distributions
+.. automodule:: pycircstat.distributions
     :members:
 

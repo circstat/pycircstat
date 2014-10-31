@@ -53,7 +53,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PyCircStat'
+project = u'pycircstat'
 copyright = u'2014, Philipp Berens, Matthias Kümmerer, Fabian Sinz, Tom Wallis, '
 
 # The version info for the project you're documenting, acts as replacement for
@@ -222,8 +222,8 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'PyCircStat.tex', u'PyCircStat Documentation',
-   u'Philipp Berens', 'manual'),
+  ('index', 'pycircstat.tex', u'pycircstat Documentation',
+   u'Philipp Berens et al.', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -252,8 +252,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pycircstat', u'PyCircStat Documentation',
-     [u'Philipp Behrens'], 1)
+    ('index', 'pycircstat', u'pycircstat Documentation',
+     [u'Philipp Behrens et al.'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -266,8 +266,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PyCircStat', u'PyCircStat Documentation',
-   u'Philipp Behrens', 'PyCircStat', 'One line description of project.',
+  ('index', 'pycircstat', u'pycircstat Documentation',
+   u'Philipp Behrens et al.', 'pycircstat', 'One line description of project.',
    'Miscellaneous'),
 ]
 

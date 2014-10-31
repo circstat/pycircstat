@@ -1,6 +1,6 @@
 Descriptive Circular Statistics
 ===============================
 
-.. automodule:: PyCircStat.descriptive
+.. automodule:: pycircstat.descriptive
     :members:
 

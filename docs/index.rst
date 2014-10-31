@@ -1,12 +1,12 @@
-.. PyCircStat documentation master file, created by
+.. pycircstat documentation master file, created by
    sphinx-quickstart on Tue Sep 23 13:08:52 2014.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyCircStat's documentation!
+Welcome to pycircstat's documentation!
 ======================================
 
-All functions take arguments in radians (expect for ang2rad).
+All functions take arguments in radians.
 For a detailed description of arguments and outputs consult the help text of the respective functions.
 
 The implementation follows in most cases 'Biostatistical Analysis' and all referenced equations and tables
@@ -24,6 +24,7 @@ Contents:
    :maxdepth: 2
 
    descriptive.rst
+   tests.rst
    distributions.rst
    iterators.rst
    decorators.rst
@@ -48,3 +49,5 @@ Indices and tables
 .. [Fisher1995] Fisher, Nicholas I. Statistical analysis of circular data. Cambridge University Press, 1995.
 .. [Jammalamadaka2001] Jammalamadaka, S. Rao, and Ambar Sengupta. Topics in circular statistics. Vol. 5. World Scientific, 2001.
 .. [Zar2009] Zar, Jerrold H. Biostatistical analysis. Pearson Education India, 2009.
+.. [Batschelet1981] Batschelet, E. Circular statistics in biology, Academic Press, London, 1981. ISBN 0-12-081050-6.
+.. [RusselLevitin1995] Russell, G. S., and D. J. Levitin. "An expanded table of probability values for Rao's Spacing Test." Communications in Statistics-Simulation and Computation 24.4 (1995): 879-888.
