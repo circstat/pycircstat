@@ -18,7 +18,7 @@ def mod2pi(f):
             ret2 = []
             for r in ret:
                 if type(r) == np.ndarray or np.isscalar(r):
-                    ret2.append(r % (2*np.pi) )
+                    ret2.append(r % (2*np.pi))
                 elif type(r) is CI:
                     ret2.append(CI(r.lower % (2*np.pi), r.upper % (2*np.pi)))
                 else:
@@ -31,6 +31,7 @@ def mod2pi(f):
 
     return return_func
 
+
 def get_var(f, varnames, args, kwargs):
     fvarnames = f.__code__.co_varnames
 
@@ -40,15 +41,18 @@ def get_var(f, varnames, args, kwargs):
         if varname in fvarnames:
             var_pos = fvarnames.index(varname)
         else:
-            raise ValueError('Function %s does not have variable %s.' % (f.__name__, varnames))
+            raise ValueError('Function %s does not have variable %s.'
+                             % (f.__name__, varnames))
         if len(args) >= var_pos + 1:
             var_idx.append(var_pos)
         elif varname in kwargs:
             kwar_keys.append(varname)
         else:
-            raise ValueError('%s was not specified in  %s.' % (varnames, f.__name__))
+            raise ValueError('%s was not specified in  %s.'
+                             % (varnames, f.__name__))
 
     return var_idx, kwar_keys
+
 
 class swap2zeroaxis:
     """
@@ -60,14 +64,15 @@ class swap2zeroaxis:
 
     This creates a new function that
 
-    - either swaps the axes axis to zero for the arguments x and y if axis is specified in dummy or ravels x and y
-    - swaps back the axes from the output arguments 0 and 1. Here it is assumed that the outputs lost one dimension
-      during the function (e.g. like numpy.mean(x, axis=1) looses one axis).
+    - either swaps the axes axis to zero for the arguments x and y if axis
+      is specified in dummy or ravels x and y
+    - swaps back the axes from the output arguments 0 and 1. Here it is
+      assumed that the outputs lost one dimension during the function
+      (e.g. like numpy.mean(x, axis=1) looses one axis).
     """
     def __init__(self, inputs, out_idx):
         self.inputs = inputs
         self.out_idx = out_idx
-
 
     def __call__(self, f):
 
@@ -110,12 +115,14 @@ class swap2zeroaxis:
                 if isinstance(outputs, tuple):
                     outputs = list(outputs)
                     for i in self.out_idx:
-                        outputs[i] = outputs[i][np.newaxis, ...].swapaxes(0, axis).squeeze()
+                        outputs[i] = outputs[i][np.newaxis, ...].\
+                            swapaxes(0, axis).squeeze()
 
                     return tuple(outputs)
                 else:
                     if self.out_idx != [0]:
-                        raise ValueError("Single output argument and out_idx != [0] are inconsistent!")
+                        raise ValueError("Single output argument and out_idx \
+                                         != [0] are inconsistent!")
                     return outputs[np.newaxis, ...].swapaxes(0, axis).squeeze()
             else:
                 return outputs
