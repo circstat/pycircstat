@@ -28,8 +28,8 @@ def nd_bootstrap(data, iterations, axis=None, strip_tuple_if_one=True):
         for i in range(iterations):
             idx = np.random.randint(m, size=(m,))
             if len(data) == 1 and strip_tuple_if_one:
-                yield data0[0][np.ix_(idx), ...].squeeze().transpose(fro).reshape(shape0)
+                yield (data0[0][np.ix_(idx), ...].squeeze().
+                       transpose(fro).reshape(shape0))
             else:
-                yield tuple(a[np.ix_(idx), ...].squeeze().transpose(fro).reshape(shape0) for a in data0)
-
-
+                yield tuple(a[np.ix_(idx), ...].squeeze().
+                            transpose(fro).reshape(shape0) for a in data0)
