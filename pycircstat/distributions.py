@@ -4,6 +4,7 @@ from pycircstat import mod2pi
 
 
 class cardioid_gen(rv_continuous):
+
     """
 
     Cardioid distribution of a single random variable.
@@ -63,6 +64,7 @@ cardioid = cardioid_gen(name='cardioid', a=0, b=2 * np.pi, shapes="mu, rho")
 
 
 class triangular_gen(rv_continuous):
+
     """
 
     triangular distribution of a single random variable.
@@ -116,10 +118,10 @@ class triangular_gen(rv_continuous):
         x = x % (2 * np.pi)
         ret = 0 * x
         idx = (x < np.pi)
-        ret[idx] = -0.125 * rho[idx] * x[idx]**2 + x[idx] * \
-            (0.125 * np.pi**2 * rho[idx] + 0.5) / np.pi
-        ret[~idx] = 0.125 * rho[~idx] * x[~idx]**2 + 0.25 * \
-            np.pi**2 * rho[~idx] - x[~idx] * \
+        ret[idx] = -0.125 * rho[idx] * x[idx] ** 2 + x[idx] * \
+            (0.125 * np.pi ** 2 * rho[idx] + 0.5) / np.pi
+        ret[~idx] = 0.125 * rho[~idx] * x[~idx] ** 2 + 0.25 * \
+            np.pi ** 2 * rho[~idx] - x[~idx] * \
             (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
         return ret
 

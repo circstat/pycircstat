@@ -18,14 +18,15 @@ def mod2pi(f):
             ret2 = []
             for r in ret:
                 if type(r) == np.ndarray or np.isscalar(r):
-                    ret2.append(r % (2*np.pi))
+                    ret2.append(r % (2 * np.pi))
                 elif type(r) is CI:
-                    ret2.append(CI(r.lower % (2*np.pi), r.upper % (2*np.pi)))
+                    ret2.append(
+                        CI(r.lower % (2 * np.pi), r.upper % (2 * np.pi)))
                 else:
                     raise TypeError("Type not known!")
             return tuple(ret2)
         elif type(ret) == np.ndarray or np.isscalar(ret):
-            return ret % (2*np.pi)
+            return ret % (2 * np.pi)
         else:
             raise TypeError("Type not known!")
 
@@ -55,6 +56,7 @@ def get_var(f, varnames, args, kwargs):
 
 
 class swap2zeroaxis:
+
     """
     This decorator is best explained by an example::
 
@@ -70,6 +72,7 @@ class swap2zeroaxis:
       assumed that the outputs lost one dimension during the function
       (e.g. like numpy.mean(x, axis=1) looses one axis).
     """
+
     def __init__(self, inputs, out_idx):
         self.inputs = inputs
         self.out_idx = out_idx
