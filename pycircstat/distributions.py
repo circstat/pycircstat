@@ -109,16 +109,18 @@ class triangular_gen(rv_continuous):
 
     def _pdf(self, x, rho):
         x = x % (2 * np.pi)
-        return (4 - np.pi ** 2 * rho + 2 * np.pi * rho * np.abs(np.pi - x)) / 8. / np.pi
+        return ((4 - np.pi ** 2 * rho + 2 * np.pi * rho * np.abs(np.pi - x))
+                / 8. / np.pi)
 
     def _cdf(self, x, rho):
         x = x % (2 * np.pi)
         ret = 0 * x
         idx = (x < np.pi)
-        ret[idx] = -0.125 * rho[idx] * x[idx]**2 + x[idx] * (0.125 * np.pi**2 * rho[idx] + 0.5) / np.pi
-        ret[~idx] = 0.125 * rho[~idx] * x[~idx]**2 + 0.25 * np.pi**2 * rho[~idx] - x[~idx] * \
-                        (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
+        ret[idx] = -0.125 * rho[idx] * x[idx]**2 + x[idx] * \
+            (0.125 * np.pi**2 * rho[idx] + 0.5) / np.pi
+        ret[~idx] = 0.125 * rho[~idx] * x[~idx]**2 + 0.25 * \
+            np.pi**2 * rho[~idx] - x[~idx] * \
+            (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
         return ret
 
 triangular = triangular_gen(name='triangular', a=0, b=2 * np.pi, shapes="rho")
-
