@@ -13,6 +13,7 @@ from pycircstat.decorators import mod2pi
 
 
 class bootstrap:
+
     """
     Decorator to implement bootstrapping. It looks for the arguments ci, axis,
     and bootstrap_iter to determine the proper parameters for bootstrapping.
@@ -137,7 +138,7 @@ def median(alpha, axis=None, ci=None, bootstrap_iter=None):
 
         md = mean(beta[min_idx])
         if np.abs(cdiff(mean(beta), md)) > np.abs(cdiff(mean(beta),
-                                                  md + np.pi)):
+                                                        md + np.pi)):
             md = (md + np.pi) % (2 * np.pi)
 
         med[out_idx] = md
@@ -319,7 +320,8 @@ def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     alpha = np.asarray(alpha)
 
     assert w.shape == alpha.shape, "Dimensions of data " + str(alpha.shape) \
-                                   + " and w " + str(w.shape) + " do not match!"
+                                   + " and w " + \
+        str(w.shape) + " do not match!"
 
     return ((w * np.exp(1j * alpha * axial_correction)).sum(axis=axis) /
             np.sum(w, axis=axis))
@@ -349,7 +351,7 @@ def center(*args, **kwargs):
         return args[0] - mean(args[0], axis=axis)
     else:
         return tuple([a - mean(a, axis=axis)[reshaper]
-                     for a in args if type(a) == np.ndarray])
+                      for a in args if type(a) == np.ndarray])
 
 
 @mod2pi
@@ -538,7 +540,7 @@ def axial(alpha, p=1):
 
 
 def _corr(x, y, axis=None):
-    return np.mean(x*y, axis=axis)/np.std(x, axis=axis)/np.std(y, axis=axis)
+    return np.mean(x * y, axis=axis) / np.std(x, axis=axis) / np.std(y, axis=axis)
 
 
 @bootstrap(1, 'linear')

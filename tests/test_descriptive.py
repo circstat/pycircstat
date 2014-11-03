@@ -20,7 +20,7 @@ axis_2arg_test_funcs = [pycircstat.corrcc,
 
 
 def test_axis_1arg():
-    data = np.random.rand(2, 3, 5)*np.pi
+    data = np.random.rand(2, 3, 5) * np.pi
     for f in axis_1arg_test_funcs:
         for a in [None, 0, 1, 2]:
             ret = f(data, axis=a)
@@ -28,18 +28,18 @@ def test_axis_1arg():
             if a is None:
                 assert_true(isinstance(ret, np.ndarray) or np.isscalar(ret))
             else:
-                assert_equal(ret.shape, data.shape[:a] + data.shape[a+1:])
+                assert_equal(ret.shape, data.shape[:a] + data.shape[a + 1:])
 
 
 def test_axis_2arg():
-    data = np.random.rand(2, 3, 5)*np.pi
+    data = np.random.rand(2, 3, 5) * np.pi
     for f in axis_2arg_test_funcs:
         for a in [None, 0, 1, 2]:
             ret = f(data, data, axis=a)
             if a is None:
                 assert_true(isinstance(ret, np.ndarray) or np.isscalar(ret))
             else:
-                assert_equal(ret.shape, data.shape[:a] + data.shape[a+1:])
+                assert_equal(ret.shape, data.shape[:a] + data.shape[a + 1:])
 
 
 def test_var():
@@ -75,37 +75,39 @@ def test_astd():
 
 
 def test_percentile():
-    alpha = np.linspace(0, 2*np.pi, 1./0.0001)
-    s = np.random.rand()*2*np.pi
+    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)
+    s = np.random.rand() * 2 * np.pi
     q = pycircstat.percentile(alpha, 5, q0=s)
     #print(q, s+0.05*np.pi*2)
-    assert_allclose(q, (s+0.05*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
+    assert_allclose(q, (s + 0.05 * np.pi * 2) %
+                    (2 * np.pi), atol=0.001, rtol=0.001)
 
 
 def test_percentile_2q():
-    alpha = np.linspace(0, 2*np.pi, 1./0.0001)
-    s = np.random.rand()*2*np.pi
+    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)
+    s = np.random.rand() * 2 * np.pi
     q = pycircstat.percentile(alpha, [5, 10], q0=s)
     #print(q, s+np.array([0.05,0.1])*np.pi*2)
-    assert_allclose(q, (s+np.array([0.05, 0.1])*np.pi*2)
-                    % (2*np.pi), atol=0.001, rtol=0.001)
+    assert_allclose(q, (s + np.array([0.05, 0.1]) * np.pi * 2)
+                    % (2 * np.pi), atol=0.001, rtol=0.001)
 
 
 def test_percentile_2d():
-    alpha = np.linspace(0, 2*np.pi, 1./0.0001)[None, :]*np.ones((2, 1))
-    s = np.random.rand(2)*2*np.pi
+    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)[None, :] * np.ones((2, 1))
+    s = np.random.rand(2) * 2 * np.pi
     q = pycircstat.percentile(alpha, 5, q0=s, axis=1)
     #print(q,  (s+0.05*np.pi*2) % (2*np.pi))
-    assert_allclose(q,  (s+0.05*np.pi*2) % (2*np.pi), atol=0.001, rtol=0.001)
+    assert_allclose(q,  (s + 0.05 * np.pi * 2) %
+                    (2 * np.pi), atol=0.001, rtol=0.001)
 
 
 def test_percentile_2d_2q():
-    alpha = np.linspace(0, 2*np.pi, 1./0.0001)[None, :]*np.ones((2, 1))
-    s = np.random.rand(2)*2*np.pi
+    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)[None, :] * np.ones((2, 1))
+    s = np.random.rand(2) * 2 * np.pi
     q = pycircstat.percentile(alpha, [5, 10], q0=s, axis=1)
     #print(q, s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)
-    assert_allclose(q,  (s[None, :]+np.array([[0.05, 0.1]]).T*np.pi*2)
-                    % (2*np.pi), atol=0.001, rtol=0.001)
+    assert_allclose(q,  (s[None, :] + np.array([[0.05, 0.1]]).T * np.pi * 2)
+                    % (2 * np.pi), atol=0.001, rtol=0.001)
 
 
 def test_median():
@@ -117,10 +119,10 @@ def test_median():
     ])
     m0 = np.array([2.93010777, 0.86489223, -1.09780942, -1.77770474,
                    -3.13447497, -2.39801834, -1.15941990, -1.17539688,
-                   -1.58318053, 2.47357966]) % (2*np.pi)
-    m1 = np.array([-2.24671810, -1.24910966]) % (2*np.pi)
-    m11 = np.array([-2.24200713, -1.82878923]) % (2*np.pi)
-    mall = -2.2467 % (2*np.pi)
+                   -1.58318053, 2.47357966]) % (2 * np.pi)
+    m1 = np.array([-2.24671810, -1.24910966]) % (2 * np.pi)
+    m11 = np.array([-2.24200713, -1.82878923]) % (2 * np.pi)
+    mall = -2.2467 % (2 * np.pi)
     assert_allclose(pycircstat.median(alpha, axis=1), m1)
     assert_allclose(pycircstat.median(alpha[:, :-1], axis=1), m11)
     assert_allclose(pycircstat.median(alpha, axis=0), m0)
@@ -245,31 +247,31 @@ def test_mean_ci_1d():
 
 
 def test_center():
-    data = np.random.rand(1000)*2*np.pi
+    data = np.random.rand(1000) * 2 * np.pi
     try:
         assert_allclose(pycircstat.mean(pycircstat.center(data)),
                         0, rtol=1e-3, atol=1e-3)
     except:
         assert_allclose(pycircstat.mean(pycircstat.center(data)),
-                        2*np.pi, rtol=1e-3, atol=1e-3)
+                        2 * np.pi, rtol=1e-3, atol=1e-3)
 
 
 def test_corrcc():
-    data1 = np.random.rand(50000)*2*np.pi
-    data2 = np.random.rand(50000)*2*np.pi
+    data1 = np.random.rand(50000) * 2 * np.pi
+    data2 = np.random.rand(50000) * 2 * np.pi
     assert_allclose(pycircstat.corrcc(data1, data2),
-                    0., rtol=3*1e-2, atol=3*1e-2)
+                    0., rtol=3 * 1e-2, atol=3 * 1e-2)
 
 
 def test_corrcc_ci():
-    data1 = np.random.rand(200)*2*np.pi
+    data1 = np.random.rand(200) * 2 * np.pi
     data2 = np.asarray(data1)
     exp = (1., pycircstat.CI(1., 1.))
     assert_equal(pycircstat.corrcc(data1, data2, ci=0.95), exp)
 
 
 def test_corrcc_ci_2d():
-    data1 = np.random.rand(2, 200)*np.pi
+    data1 = np.random.rand(2, 200) * np.pi
     data2 = np.asarray(data1)
 
     out1, (out2, out3) = pycircstat.corrcc(data1, data2, ci=0.95, axis=1)
@@ -280,7 +282,7 @@ def test_corrcc_ci_2d():
 
 
 def test_corrcl():
-    data1 = np.random.rand(50000)*2*np.pi
+    data1 = np.random.rand(50000) * 2 * np.pi
     data2 = np.random.randn(50000)
     assert_allclose(pycircstat.corrcc(data1, data2),
-                    0., rtol=3*1e-2, atol=3*1e-2)
+                    0., rtol=3 * 1e-2, atol=3 * 1e-2)
