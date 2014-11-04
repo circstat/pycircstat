@@ -59,8 +59,8 @@ class cardioid_gen(rv_continuous):
         x = x % (2 * np.pi)
         return (2 * rho * np.sin(x - mu) + x + 2 * rho * np.sin(mu)) / 2 / np.pi
 
-
-cardioid = cardioid_gen(name='cardioid', a=0, b=2. * np.pi, shapes="mu, rho")
+if not 'sphinx' in sys.modules:
+    cardioid = cardioid_gen(name='cardioid', a=0, b=2. * np.pi, shapes="mu, rho")
 
 
 class triangular_gen(rv_continuous):
@@ -124,5 +124,5 @@ class triangular_gen(rv_continuous):
             np.pi ** 2 * rho[~idx] - x[~idx] * \
             (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
         return ret
-
-triangular = triangular_gen(name='triangular', a=0, b=2. * np.pi, shapes="rho")
+if not 'sphinx' in sys.modules:
+    triangular = triangular_gen(name='triangular', a=0, b=2. * np.pi, shapes="rho")
