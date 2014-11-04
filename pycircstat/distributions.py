@@ -60,7 +60,7 @@ class cardioid_gen(rv_continuous):
         return (2 * rho * np.sin(x - mu) + x + 2 * rho * np.sin(mu)) / 2 / np.pi
 
 
-cardioid = cardioid_gen(name='cardioid', a=0, b=2 * np.pi, shapes="mu, rho")
+cardioid = cardioid_gen(name='cardioid', a=0, b=2. * np.pi, shapes="mu, rho")
 
 
 class triangular_gen(rv_continuous):
@@ -111,7 +111,7 @@ class triangular_gen(rv_continuous):
 
     def _pdf(self, x, rho):
         x = x % (2 * np.pi)
-        return ((4 - np.pi ** 2 * rho + 2 * np.pi * rho * np.abs(np.pi - x))
+        return ((4 - np.pi ** 2. * rho + 2. * np.pi * rho * np.abs(np.pi - x))
                 / 8. / np.pi)
 
     def _cdf(self, x, rho):
@@ -125,4 +125,4 @@ class triangular_gen(rv_continuous):
             (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
         return ret
 
-triangular = triangular_gen(name='triangular', a=0, b=2 * np.pi, shapes="rho")
+triangular = triangular_gen(name='triangular', a=0, b=2. * np.pi, shapes="rho")
