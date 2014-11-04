@@ -44,7 +44,7 @@ class cardioid_gen(rv_continuous):
     """
 
     def _argcheck(self, mu, rho):
-        return (-.5 <= rho <= .5) and (0 <= mu <= 2 * np.pi)
+        return (-.5 <= rho <= .5) and (0 <= mu <= 2. * np.pi)
 
     def _stats(self, mu, rho):
         return mu, None, None, None
