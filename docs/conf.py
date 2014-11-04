@@ -14,6 +14,12 @@
 
 import sys
 import os
+import mock
+ 
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.stats']
+for mod_name in MOCK_MODULES:
+sys.modules[mod_name] = mock.Mock()
+
 #import sphinx_bootstrap_theme
 
 # If extensions (or modules to document with autodoc) are in another directory,
