@@ -108,18 +108,18 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'bootstrap'
+#html_theme = 'bootstrap'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
-html_theme_options = {
-    'source_link_position': "footer",
-    'navbar_sidebarrel': False,
-    'bootstrap_version': "3",
-    'bootswatch_theme': "cosmo",
+#html_theme_options = {
+#    'source_link_position': "footer",
+#    'navbar_sidebarrel': False,
+#    'bootstrap_version': "3",
+#    'bootswatch_theme': "cosmo",
     #'navbar_links': [("Tutorial", "tutorial"), ("Gallery", "examples/index")],
-}
+#}
 
 #html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
