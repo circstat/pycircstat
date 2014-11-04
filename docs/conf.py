@@ -121,7 +121,7 @@ html_theme_options = {
     #'navbar_links': [("Tutorial", "tutorial"), ("Gallery", "examples/index")],
 }
 
-html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 #html_theme_options = {'sidebarbgcolor':'steelblue',
 #                      'sidebartextcolor':'black',
