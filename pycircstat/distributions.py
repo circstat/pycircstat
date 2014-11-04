@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 from scipy.stats import rv_continuous
 import numpy as np
-from pycircstat import mod2pi
+from . import mod2pi
 import sys
 
 class cardioid_gen(rv_continuous):
