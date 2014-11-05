@@ -511,7 +511,7 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     :param bootstrap_iter: number of bootstrap iterations
                            (number of samples if None)
     :param ci:   if not None, confidence level is bootstrapped
-    :return:      2 * circular variance
+    :return:      Square root of angular variance
 
     References: [Zar2009]_
     """
