@@ -2,11 +2,10 @@ from __future__ import absolute_import
 
 from scipy.stats import rv_continuous
 import numpy as np
-from . import mod2pi
 import sys
 
-class cardioid_gen(rv_continuous):
 
+class cardioid_gen(rv_continuous):
     """
 
     Cardioid distribution of a single random variable.
@@ -61,12 +60,11 @@ class cardioid_gen(rv_continuous):
         x = x % (2 * np.pi)
         return (2 * rho * np.sin(x - mu) + x + 2 * rho * np.sin(mu)) / 2 / np.pi
 
-if not 'sphinx' in sys.modules:
+if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
     cardioid = cardioid_gen(name='cardioid', a=0, b=2. * np.pi, shapes="mu, rho")
 
 
 class triangular_gen(rv_continuous):
-
     """
 
     triangular distribution of a single random variable.
@@ -126,5 +124,6 @@ class triangular_gen(rv_continuous):
             np.pi ** 2 * rho[~idx] - x[~idx] * \
             (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
         return ret
-if not 'sphinx' in sys.modules:
+
+if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
     triangular = triangular_gen(name='triangular', a=0, b=2. * np.pi, shapes="rho")

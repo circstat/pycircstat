@@ -15,7 +15,6 @@ from .decorators import mod2pi
 
 
 class bootstrap:
-
     """
     Decorator to implement bootstrapping. It looks for the arguments ci, axis,
     and bootstrap_iter to determine the proper parameters for bootstrapping.
