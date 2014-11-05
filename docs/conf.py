@@ -15,10 +15,12 @@
 import sys
 import os
 import mock
- 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.stats']
+
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
+
+sys.modules['scipy.stats'] = mock.Mock(rv_continuous=object)
 
 #import sphinx_bootstrap_theme
 
