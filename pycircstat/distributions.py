@@ -26,7 +26,7 @@ class cardioid_gen(rv_continuous):
 
     **Example:**
 
-    ..code::
+    ::
 
         from pycircstat.distributions import cardioid
         import matplotlib.pyplot as plt
@@ -85,7 +85,7 @@ class triangular_gen(rv_continuous):
 
     **Example:**
 
-    ..code::
+    ::
 
          from pycircstat.distributions import triangular
          import matplotlib.pyplot as plt
