@@ -1,6 +1,8 @@
+from __future__ import absolute_import
+
 from functools import wraps
 import numpy as np
-from pycircstat import CI
+from . import CI
 
 
 def mod2pi(f):

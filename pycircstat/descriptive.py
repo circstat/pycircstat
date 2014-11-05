@@ -1,15 +1,17 @@
 """
 Descriptive statistical functions
 """
+from __future__ import absolute_import
+
 from functools import wraps
 import itertools
 
 import numpy as np
 from scipy import stats
 import warnings
-from pycircstat import CI
-from pycircstat.iterators import nd_bootstrap
-from pycircstat.decorators import mod2pi
+from . import CI
+from .iterators import nd_bootstrap
+from .decorators import mod2pi
 
 
 class bootstrap:

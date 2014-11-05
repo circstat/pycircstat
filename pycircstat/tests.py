@@ -1,11 +1,13 @@
 """
 Statistical tests
 """
+from __future__ import absolute_import
+
 import numpy as np
 from scipy import misc
 #import warnings
-from pycircstat import descriptive
-from pycircstat import utils
+from . import descriptive
+from . import utils
 
 
 def rayleigh(alpha, w=None, d=None, axis=0):
