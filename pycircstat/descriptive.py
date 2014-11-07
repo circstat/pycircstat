@@ -203,7 +203,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=None, axial_correction=1):
     :return: circular mean if ci=None, or circular mean as well as lower and
              upper confidence interval limits
 
-    Example:
+    Example:   ### TODO: fix this example. Imports are not clear ###
 
     >>> import numpy as np
     >>> data = 2*np.pi*np.random.rand(10)
