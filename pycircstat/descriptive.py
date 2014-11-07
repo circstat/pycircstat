@@ -606,3 +606,56 @@ def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
     den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) *
                   np.sum(np.sin(alpha2) ** 2, axis=axis))
     return num / den
+
+
+def moment(alpha, p=1, cent=False,
+           w=None, d=None, axis=None):
+    """
+    Computes the complex p-th centred or non-centred moment of the angular
+    data in alpha.
+
+    :param alpha: sample of angles in radian
+    :param p:     the p-th moment to be computed; default is 1.
+    :param cent:  if True, compute central moments. Default False.
+    :param w:     number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension,
+                  default is None (across all dimensions)
+    :return:    Tuple containing three values:
+                mp      the complex p-th moment
+                rho_p   magnitude of the p-th moment
+                mu_p    angle of the p-th moment
+
+    Example:
+
+        import numpy as np
+        import pycircstat as circ
+        data = 2*np.pi*np.random.rand(10)
+        mp, rho_p, mu_p = circ.moment(data)
+
+    References: [Fisher1995]_ p. 33/34
+    """
+
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
+    if w is None:
+        w = np.ones_like(alpha)
+
+    assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    if cent:
+        theta = mean(alpha, w=w, d=d, axis=axis)
+        v = alpha.size / theta.size
+        alpha = cdiff(alpha, np.tile(theta, v))
+
+    n = alpha.shape[axis]
+    cbar = np.sum(np.cos(p * alpha) * w, axis) / n
+    sbar = np.sum(np.sin(p * alpha) * w, axis) / n
+    mp = cbar + 1j * sbar
+
+    rho_p = np.abs(mp)
+    mu_p = np.angle(mp)
+    return(mp, rho_p, mu_p)
