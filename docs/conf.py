@@ -15,12 +15,17 @@
 import sys
 import os
 import mock
- 
-MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot', 'scipy.stats']
+import os
+on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
+
+
+MOCK_MODULES = ['numpy', 'scipy', 'matplotlib', 'matplotlib.pyplot']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
 
-#import sphinx_bootstrap_theme
+sys.modules['scipy.stats'] = mock.Mock(rv_continuous=object)
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -114,28 +119,10 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#html_theme = 'bootstrap'
-
-# Theme options are theme-specific and customize the look and feel of a theme
-# further.  For a list of options available for each theme, see the
-# documentation.
-#html_theme_options = {
-#    'source_link_position': "footer",
-#    'navbar_sidebarrel': False,
-#    'bootstrap_version': "3",
-#    'bootswatch_theme': "cosmo",
-    #'navbar_links': [("Tutorial", "tutorial"), ("Gallery", "examples/index")],
-#}
-
-#html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
-
-#html_theme_options = {'sidebarbgcolor':'steelblue',
-#                      'sidebartextcolor':'black',
-#                      'sidebarlinkcolor':'silver',
-#                      'relbarbgcolor': 'slategray',
-#                      'headbgcolor':'white',
-#                      'footerbgcolor': 'slategray',
-#                      'stickysidebar':True  }
+if not on_rtd:  # only import and set the theme if we're building docs locally
+    import sphinx_rtd_theme
+    html_theme = 'sphinx_rtd_theme'
+    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
@@ -273,7 +260,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'pycircstat', u'pycircstat Documentation',
-   u'Philipp Behrens et al.', 'pycircstat', 'One line description of project.',
+   u'Philipp Berens et al.', 'pycircstat', 'One line description of project.',
    'Miscellaneous'),
 ]
 
