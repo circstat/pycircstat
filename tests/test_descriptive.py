@@ -293,10 +293,8 @@ def test_moment_1():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
                      4.77054777, 1.51736933, 0.72727580])
-    mp, rho_p, mu_p = pycircstat.moment(data)
+    mp = pycircstat.moment(data)
     assert_allclose(mp, 0.074229066428146 + 0.333420553996661j, rtol=1e-6)
-    assert_allclose(rho_p, 0.341583401426700, rtol=1e-7)
-    assert_allclose(mu_p, 1.351739830721482, rtol=1e-7)
 
 
 def test_moment_2():
@@ -304,10 +302,8 @@ def test_moment_2():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
                      4.77054777, 1.51736933, 0.72727580])
-    mp, rho_p, mu_p = pycircstat.moment(data, cent=True)
+    mp = pycircstat.moment(data, cent=True)
     assert_allclose(mp, 3.415834014267002e-01, rtol=1e-7)
-    assert_allclose(rho_p, 3.415834014267002e-01, rtol=1e-7)
-    assert_allclose(mu_p, 0., rtol=1e-7, atol=1e-7)
 
 
 def test_moment_3():
@@ -315,11 +311,9 @@ def test_moment_3():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
                      4.77054777, 1.51736933, 0.72727580])
-    mp, rho_p, mu_p = pycircstat.moment(data, p=2)
+    mp = pycircstat.moment(data, p=2)
     assert_allclose(mp, -6.729059729506420e-01 - 1.337676350865910e-01j,
                     rtol=1e-7)
-    assert_allclose(rho_p, 6.860730490474827e-01, rtol=1e-7)
-    assert_allclose(mu_p, -2.945359886694066e+00, rtol=1e-7)
 
 
 def test_moment_4():
@@ -331,8 +325,6 @@ def test_moment_4():
                     [1.07677, 1.49836],
                     [2.96969, 1.51748],
                     ])
-    mp, rho_p, mu_p = pycircstat.moment(data, axis=0)
+    mp = pycircstat.moment(data, axis=0)
     assert_allclose(mp, [-0.046239398678727 + 0.556490077122954j,
                          -0.169610962142131 + 0.727602093024094j], rtol=1e-7)
-    assert_allclose(rho_p, [0.558407815065729, 0.747109553045484], rtol=1e-7)
-    assert_allclose(mu_p, [1.653697037563983, 1.799815976137263], rtol=1e-7)

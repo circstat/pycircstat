@@ -624,8 +624,7 @@ def moment(alpha, p=1, cent=False,
                   estimation of r
     :param axis:  compute along this dimension,
                   default is None (across all dimensions)
-    :return:    Tuple containing three values:
-                mp      the complex p-th moment
+    :return:    the complex p-th moment.
                 rho_p   magnitude of the p-th moment
                 mu_p    angle of the p-th moment
 
@@ -634,7 +633,12 @@ def moment(alpha, p=1, cent=False,
         import numpy as np
         import pycircstat as circ
         data = 2*np.pi*np.random.rand(10)
-        mp, rho_p, mu_p = circ.moment(data)
+        mp = circ.moment(data)
+
+    You can then calculate the magnitude and angle of the p-th moment:
+
+        rho_p = np.abs(mp)  # magnitude
+        mu_p = np.angle(mp)  # angle
 
     References: [Fisher1995]_ p. 33/34
     """
@@ -657,6 +661,4 @@ def moment(alpha, p=1, cent=False,
     sbar = np.sum(np.sin(p * alpha) * w, axis) / n
     mp = cbar + 1j * sbar
 
-    rho_p = np.abs(mp)
-    mu_p = np.angle(mp)
-    return(mp, rho_p, mu_p)
+    return mp
