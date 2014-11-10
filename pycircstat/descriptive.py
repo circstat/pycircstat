@@ -609,8 +609,10 @@ def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
     return num / den
 
 
+@bootstrap(1, 'linear')
 def moment(alpha, p=1, cent=False,
-           w=None, d=None, axis=None):
+           w=None, d=None, axis=None,
+           ci=None, bootstrap_iter=None):
     """
     Computes the complex p-th centred or non-centred moment of the angular
     data in alpha.
@@ -624,6 +626,9 @@ def moment(alpha, p=1, cent=False,
                   estimation of r
     :param axis:  compute along this dimension,
                   default is None (across all dimensions)
+    :param ci: if not None, confidence level is bootstrapped
+    :param bootstrap_iter: number of bootstrap iterations
+                           (number of samples if None)
     :return:    the complex p-th moment.
                 rho_p   magnitude of the p-th moment
                 mu_p    angle of the p-th moment
@@ -639,6 +644,10 @@ def moment(alpha, p=1, cent=False,
 
         rho_p = np.abs(mp)  # magnitude
         mu_p = np.angle(mp)  # angle
+
+    You can also calculate bootstrap confidence intervals:
+
+        mp, (ci_l, ci_u) = circ.moment(data, ci=0.95)
 
     References: [Fisher1995]_ p. 33/34
     """

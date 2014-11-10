@@ -328,3 +328,16 @@ def test_moment_4():
     mp = pycircstat.moment(data, axis=0)
     assert_allclose(mp, [-0.046239398678727 + 0.556490077122954j,
                          -0.169610962142131 + 0.727602093024094j], rtol=1e-7)
+
+
+def test_moment_5():
+    """ circ.moment: test bootstrapping... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp, (lo, hi) = pycircstat.moment(data, ci=0.8)
+    assert_allclose(mp, 0.074229066428146 + 0.333420553996661j, rtol=1e-6)
+    # assert_allclose(lo, -0.0871916735424+0.71239443351j, rtol=1e-3)
+    # assert_allclose(hi, 0.238513834062+0.140762896499j, rtol=1e-3)
+    # not sure of a good way to do tests for bootstraps.
+
