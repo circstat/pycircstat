@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 from functools import wraps
 import itertools
+from decorator import decorator
 
 import numpy as np
 from scipy import stats
@@ -55,8 +56,9 @@ class bootstrap:
         return val
 
     def __call__(self, f):
-        @wraps(f)
-        def wrapped_f(*args, **kwargs):
+
+        def wrapper(f, *args, **kwargs):
+            args = list(args)
             ci = self._get_var(f, 'ci', None, args, kwargs, remove=True)
             bootstrap_iter = self._get_var(f, 'bootstrap_iter', None,
                                            args, kwargs, remove=True)
@@ -71,7 +73,7 @@ class bootstrap:
 
             r0 = f(*(alpha + args0), **kwargs)
             if ci is not None:
-                r = np.asarray([f(*(a + args0), **kwargs) for a in
+                r = np.asarray([f(*(list(a) + args0), **kwargs) for a in
                                 nd_bootstrap(alpha, bootstrap_iter, axis=axis,
                                              strip_tuple_if_one=False)])
 
@@ -90,7 +92,7 @@ class bootstrap:
             else:
                 return r0
 
-        return wrapped_f
+        return decorator(wrapper, f)
 
 
 @bootstrap(1, 'circular')
