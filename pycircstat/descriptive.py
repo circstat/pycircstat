@@ -11,7 +11,7 @@ from scipy import stats
 import warnings
 from . import CI
 from .iterators import nd_bootstrap
-from .decorators import mod2pi
+from .decorators import mod2pi, swap2zeroaxis
 
 
 class bootstrap:
@@ -610,6 +610,7 @@ def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
 
 
 @bootstrap(1, 'linear')
+@swap2zeroaxis(['alpha'], [0])
 def moment(alpha, p=1, cent=False,
            w=None, d=None, axis=None,
            ci=None, bootstrap_iter=None):
@@ -652,9 +653,9 @@ def moment(alpha, p=1, cent=False,
     References: [Fisher1995]_ p. 33/34
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
+    # if axis is None:
+    #     axis = 0
+    #     alpha = alpha.ravel()
     if w is None:
         w = np.ones_like(alpha)
 
