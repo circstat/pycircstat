@@ -286,3 +286,58 @@ def test_corrcl():
     data2 = np.random.randn(50000)
     assert_allclose(pycircstat.corrcc(data1, data2),
                     0., rtol=3 * 1e-2, atol=3 * 1e-2)
+
+
+def test_moment_1():
+    """ circ.moment: test basic call... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp = pycircstat.moment(data)
+    assert_allclose(mp, 0.074229066428146 + 0.333420553996661j, rtol=1e-6)
+
+
+def test_moment_2():
+    """ circ.moment: test that the centering argument works... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp = pycircstat.moment(data, cent=True)
+    assert_allclose(mp, 3.415834014267002e-01, rtol=1e-7)
+
+
+def test_moment_3():
+    """ circ.moment: test second order... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp = pycircstat.moment(data, p=2)
+    assert_allclose(mp, -6.729059729506420e-01 - 1.337676350865910e-01j,
+                    rtol=1e-7)
+
+
+def test_moment_4():
+    """circ.moment: test 2D data (axis=0)..."""
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.moment(data, axis=0)
+    assert_allclose(mp, [-0.046239398678727 + 0.556490077122954j,
+                         -0.169610962142131 + 0.727602093024094j], rtol=1e-7)
+
+
+def test_moment_5():
+    """ circ.moment: test bootstrapping... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp, (lo, hi) = pycircstat.moment(data, ci=0.8)
+    assert_allclose(mp, 0.074229066428146 + 0.333420553996661j, rtol=1e-6)
+    # assert_allclose(lo, -0.0871916735424+0.71239443351j, rtol=1e-3)
+    # assert_allclose(hi, 0.238513834062+0.140762896499j, rtol=1e-3)
+    # not sure of a good way to do tests for bootstraps.
+

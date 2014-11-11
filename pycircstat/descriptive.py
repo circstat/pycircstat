@@ -12,7 +12,7 @@ from scipy import stats
 import warnings
 from . import CI
 from .iterators import nd_bootstrap
-from .decorators import mod2pi
+from .decorators import mod2pi, swap2zeroaxis
 
 
 class bootstrap:
@@ -206,7 +206,7 @@ def mean(alpha, w=None, ci=None, d=None, axis=None, axial_correction=1):
     :return: circular mean if ci=None, or circular mean as well as lower and
              upper confidence interval limits
 
-    Example:
+    Example:   ### TODO: fix this example. Imports are not clear ###
 
     >>> import numpy as np
     >>> data = 2*np.pi*np.random.rand(10)
@@ -609,3 +609,68 @@ def corrcc(alpha1, alpha2, ci=None, axis=None, bootstrap_iter=None):
     den = np.sqrt(np.sum(np.sin(alpha1) ** 2, axis=axis) *
                   np.sum(np.sin(alpha2) ** 2, axis=axis))
     return num / den
+
+
+@bootstrap(1, 'linear')
+@swap2zeroaxis(['alpha'], [0])
+def moment(alpha, p=1, cent=False,
+           w=None, d=None, axis=None,
+           ci=None, bootstrap_iter=None):
+    """
+    Computes the complex p-th centred or non-centred moment of the angular
+    data in alpha.
+
+    :param alpha: sample of angles in radian
+    :param p:     the p-th moment to be computed; default is 1.
+    :param cent:  if True, compute central moments. Default False.
+    :param w:     number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension,
+                  default is None (across all dimensions)
+    :param ci: if not None, confidence level is bootstrapped
+    :param bootstrap_iter: number of bootstrap iterations
+                           (number of samples if None)
+    :return:    the complex p-th moment.
+                rho_p   magnitude of the p-th moment
+                mu_p    angle of the p-th moment
+
+    Example:
+
+        import numpy as np
+        import pycircstat as circ
+        data = 2*np.pi*np.random.rand(10)
+        mp = circ.moment(data)
+
+    You can then calculate the magnitude and angle of the p-th moment:
+
+        rho_p = np.abs(mp)  # magnitude
+        mu_p = np.angle(mp)  # angle
+
+    You can also calculate bootstrap confidence intervals:
+
+        mp, (ci_l, ci_u) = circ.moment(data, ci=0.95)
+
+    References: [Fisher1995]_ p. 33/34
+    """
+
+    # if axis is None:
+    #     axis = 0
+    #     alpha = alpha.ravel()
+    if w is None:
+        w = np.ones_like(alpha)
+
+    assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    if cent:
+        theta = mean(alpha, w=w, d=d, axis=axis)
+        v = alpha.size / theta.size
+        alpha = cdiff(alpha, np.tile(theta, v))
+
+    n = alpha.shape[axis]
+    cbar = np.sum(np.cos(p * alpha) * w, axis) / n
+    sbar = np.sum(np.sin(p * alpha) * w, axis) / n
+    mp = cbar + 1j * sbar
+
+    return mp
