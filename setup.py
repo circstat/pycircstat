@@ -16,5 +16,5 @@ setup(
         "Topic :: Utilities",
         #"License :: OSI Approved :: MIT License",
     ],
-    setup_requires=['nose>=1.0', 'mock', 'sphinx_rtd_theme'],
+    setup_requires=['nose>=1.0', 'mock', 'sphinx_rtd_theme', "decorator"],
 )
