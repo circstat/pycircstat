@@ -655,9 +655,6 @@ def moment(alpha, p=1, cent=False,
     References: [Fisher1995]_ p. 33/34
     """
 
-    # if axis is None:
-    #     axis = 0
-    #     alpha = alpha.ravel()
     if w is None:
         w = np.ones_like(alpha)
 
