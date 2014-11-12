@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from functools import wraps
 import numpy as np
 from . import CI
-
+from decorator import decorator
 
 def mod2pi(f):
     """
@@ -12,8 +12,7 @@ def mod2pi(f):
     The decorated function must either return a tuple of numpy.ndarrays or a
     numpy.ndarray itself.
     """
-    @wraps(f)
-    def return_func(*args, **kwargs):
+    def wrapper(f, *args, **kwargs):
         ret = f(*args, **kwargs)
 
         if type(ret) == tuple:
@@ -32,7 +31,7 @@ def mod2pi(f):
         else:
             raise TypeError("Type not known!")
 
-    return return_func
+    return decorator(wrapper, f)
 
 
 def get_var(f, varnames, args, kwargs):
@@ -81,8 +80,8 @@ class swap2zeroaxis:
 
     def __call__(self, f):
 
-        @wraps(f)
-        def wrapped_f(*args, **kwargs):
+
+        def _deco(f, *args, **kwargs):
 
             to_swap_idx, to_swap_keys = get_var(f, self.inputs, args, kwargs)
             args = list(args)
@@ -132,4 +131,4 @@ class swap2zeroaxis:
             else:
                 return outputs
 
-        return wrapped_f
+        return decorator(_deco, f)
