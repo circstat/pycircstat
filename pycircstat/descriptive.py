@@ -662,8 +662,8 @@ def moment(alpha, p=1, cent=False,
 
     if cent:
         theta = mean(alpha, w=w, d=d, axis=axis)
-        v = alpha.size / theta.size
-        alpha = cdiff(alpha, np.tile(theta, v))
+        theta2 = np.tile(theta, (alpha.shape[0],) + len(theta.shape)*(1,))
+        alpha = cdiff(alpha, theta2)
 
     n = alpha.shape[axis]
     cbar = np.sum(np.cos(p * alpha) * w, axis) / n
