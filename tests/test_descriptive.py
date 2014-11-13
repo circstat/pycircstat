@@ -13,7 +13,9 @@ axis_1arg_test_funcs = [pycircstat.astd,
                         pycircstat.median,
                         pycircstat.resultant_vector_length,
                         pycircstat.std,
-                        pycircstat.var]
+                        pycircstat.var,
+                        pycircstat.kurtosis,
+                        pycircstat.moment]
 
 axis_2arg_test_funcs = [pycircstat.corrcc,
                         pycircstat.corrcl]
@@ -288,7 +290,7 @@ def test_corrcl():
                     0., rtol=3 * 1e-2, atol=3 * 1e-2)
 
 
-def test_moment_1():
+def test_moment_basic():
     """ circ.moment: test basic call... """
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
@@ -296,8 +298,18 @@ def test_moment_1():
     mp = pycircstat.moment(data)
     assert_allclose(mp, 0.074229066428146 + 0.333420553996661j, rtol=1e-6)
 
+def test_kurtosis_basic():
+    """ circ.kurtosis: test basic call... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp = pycircstat.kurtosis(data)
+    assert_allclose(mp, 0.55260, rtol=1e-5)
 
-def test_moment_2():
+
+
+
+def test_moment_center():
     """ circ.moment: test that the centering argument works... """
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
@@ -306,7 +318,8 @@ def test_moment_2():
     assert_allclose(mp, 3.415834014267002e-01, rtol=1e-7)
 
 
-def test_moment_3():
+
+def test_moment_second_order():
     """ circ.moment: test second order... """
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
@@ -316,7 +329,7 @@ def test_moment_3():
                     rtol=1e-7)
 
 
-def test_moment_4():
+def test_moment_2d_data_axis0():
     """circ.moment: test 2D data (axis=0)..."""
     data = np.array([
                     [0.58429, 0.88333],
@@ -329,8 +342,90 @@ def test_moment_4():
     assert_allclose(mp, [-0.046239398678727 + 0.556490077122954j,
                          -0.169610962142131 + 0.727602093024094j], rtol=1e-7)
 
+def test_moment_2d_data_axisNone():
+    """circ.moment: test 2D data (axis=0)..."""
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.moment(data)
+    assert_allclose(mp, -0.10793 + 0.64205*1j, rtol=1e-5)
 
-def test_moment_5():
+def test_kurtosis_2d_data_axis0():
+    """circ.kurtosis: test 2D data (axis=0)..."""
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.kurtosis(data, axis=0)
+    assert_allclose(mp, [-0.24688, 0.24924], rtol=1e-4)
+
+def test_kurtosis_2d_data_axisNone():
+    """circ.kurtosis: test 2D data (axis=0)..."""
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.kurtosis(data)
+    assert_allclose(mp, -0.013320, rtol=1e-4)
+
+def test_kurtosis_2d_data_axisNone_fiser():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.kurtosis(data, mode='fisher')
+    assert_allclose(mp, -1.5849, rtol=1e-4)
+
+
+def test_kurtosis_2d_data_axis1_bootstrap():
+    "basically only test whether boostrapping does not throw an error"
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp, (low, high) = pycircstat.kurtosis(data, ci=0.95)
+    assert_allclose(mp, -0.013320, rtol=1e-4)
+
+
+def test_kurtosis_2d_data_axis1():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.kurtosis(data, axis=1)
+    assert_allclose(mp,  [0.95562, 0.47166, 0.98155, 0.91244, 0.11831], rtol=1e-4)
+
+def test_kurtosis_2d_data_axis0_fisher():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.kurtosis(data, axis=0, mode='fisher')
+    assert_allclose(mp,  [-1.76462, -0.97441], rtol=1e-4)
+
+def test_moment_2d_data_axis1():
     """circ.moment: test 2D data (axis=1)..."""
     data = np.array([
                     [0.58429, 0.88333],
@@ -347,7 +442,7 @@ def test_moment_5():
                          -0.465985008566902 + 0.584818144704480j], rtol=1e-7)
 
 
-def test_moment_6():
+def test_moment_2d_data_axis1_centering():
     """circ.moment: test 2D data (axis=1) with centring..."""
     data = np.array([
                     [0.58429, 0.88333],
