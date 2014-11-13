@@ -282,6 +282,8 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None,
     """
     Computes mean resultant vector length for circular data.
 
+    This statistic is sometimes also called vector strength.
+
     :param alpha: sample of angles in radians
     :param w: number of incidences in case of binned angle data
     :param ci: ci-confidence limits are computed via bootstrapping,
@@ -316,6 +318,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None,
         r *= d / 2 / np.sin(d / 2)
     return r
 
+vector_strength = resultant_vector_length # defines synonym for resultant_vector_length
 
 def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     if w is None:
