@@ -28,6 +28,7 @@ Contents:
    distributions.rst
    iterators.rst
    decorators.rst
+   event_series.rst
 
 Disclaimer:
 ===========
