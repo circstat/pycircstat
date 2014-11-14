@@ -28,6 +28,7 @@ Contents:
    distributions.rst
    iterators.rst
    decorators.rst
+   event_series.rst
 
 Disclaimer:
 ===========
@@ -51,3 +52,4 @@ Indices and tables
 .. [Zar2009] Zar, Jerrold H. Biostatistical analysis. Pearson Education India, 2009.
 .. [Batschelet1981] Batschelet, E. Circular statistics in biology, Academic Press, London, 1981. ISBN 0-12-081050-6.
 .. [RusselLevitin1995] Russell, G. S., and D. J. Levitin. "An expanded table of probability values for Rao's Spacing Test." Communications in Statistics-Simulation and Computation 24.4 (1995): 879-888.
+.. [Pewsey2004] Pewsey, A. The large-sample joint distribution of key circular statistics, Metrika, July 2004, Volume 60, Issue 1, pp 25-32

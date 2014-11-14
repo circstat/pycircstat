@@ -282,6 +282,8 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None,
     """
     Computes mean resultant vector length for circular data.
 
+    This statistic is sometimes also called vector strength.
+
     :param alpha: sample of angles in radians
     :param w: number of incidences in case of binned angle data
     :param ci: ci-confidence limits are computed via bootstrapping,
@@ -316,6 +318,7 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None,
         r *= d / 2 / np.sin(d / 2)
     return r
 
+vector_strength = resultant_vector_length # defines synonym for resultant_vector_length
 
 def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     if w is None:
@@ -671,3 +674,39 @@ def moment(alpha, p=1, cent=False,
     mp = cbar + 1j * sbar
 
     return mp
+
+@bootstrap(1, 'linear')
+@swap2zeroaxis(['alpha'], [0])
+def kurtosis(alpha, w=None, axis=None, mode='pewsey', ci=None, bootstrap_iter=None):
+    """
+    Calculates a measure of angular kurtosis.
+
+    :param alpha: sample of angles
+    :param w: weightings in case of binned angle data
+    :param axis: statistic computed along this dimension
+    :param mode: which kurtosis to compute (options are 'pewsey' or 'fisher'; 'pewsey' is default)
+    :return: the kurtosis
+    :raise ValueError: If the mode is not 'pewsey' or 'fisher'
+
+    References: [Pewsey2004]_, [Fisher1995]_ p. 34
+    """
+    if w is None:
+        w = np.ones_like(alpha)
+    else:
+        assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    theta = mean(alpha, w=w, axis=axis)
+
+
+    if mode == 'pewsey':
+        theta2 = np.tile(theta, (alpha.shape[0],)+ len(theta.shape) * (1,))
+        return np.sum(w * (np.cos(2 * (cdiff(alpha,theta2) ) ) ), axis=0) / np.sum(w, axis=0)
+    elif mode =='fisher':
+        mom = moment(alpha,p=2,w=w,axis=axis, cent=False)
+        mu2, rho2 = np.angle(mom), np.abs(mom)
+        R = resultant_vector_length(alpha, w=w, axis=axis)
+        return (rho2 * np.cos( cdiff(mu2, 2 * theta))-R**4)/(1-R)**2 # (formula 2.30)
+    else:
+        raise ValueError("Mode %s not known!" % (mode, ))
+
+
