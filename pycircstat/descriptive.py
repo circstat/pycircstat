@@ -685,6 +685,8 @@ def kurtosis(alpha, w=None, axis=None, mode='pewsey', ci=None, bootstrap_iter=No
     :param w: weightings in case of binned angle data
     :param axis: statistic computed along this dimension
     :param mode: which kurtosis to compute (options are 'pewsey' or 'fisher'; 'pewsey' is default)
+    :param ci: if not None, confidence level is bootstrapped
+    :param bootstrap_iter: number of bootstrap iterations
     :return: the kurtosis
     :raise ValueError: If the mode is not 'pewsey' or 'fisher'
 
@@ -706,6 +708,43 @@ def kurtosis(alpha, w=None, axis=None, mode='pewsey', ci=None, bootstrap_iter=No
         mu2, rho2 = np.angle(mom), np.abs(mom)
         R = resultant_vector_length(alpha, w=w, axis=axis)
         return (rho2 * np.cos( cdiff(mu2, 2 * theta))-R**4)/(1-R)**2 # (formula 2.30)
+    else:
+        raise ValueError("Mode %s not known!" % (mode, ))
+
+@bootstrap(1, 'linear')
+@swap2zeroaxis(['alpha'], [0])
+def skewness(alpha, w=None, axis=None, ci=None, bootstrap_iter=None, mode='pewsey'):
+    """
+    Calculates a measure of angular skewness.
+
+    :param alpha:       sample of angles
+    :param w:           weightings in case of binned angle data
+    :param axis:        statistic computed along this dimension (default None, collapse dimensions)
+    :param ci:          if not None, confidence level is bootstrapped
+    :param bootstrap_iter: number of bootstrap iterations
+    :param mode:        which skewness to compute (options are 'pewsey' or 'fisher'; 'pewsey' is default)
+    :return:            the skewness
+    :raise ValueError:
+
+    References: [Pewsey2004]_, [Fisher1995]_ p. 34
+    """
+    if w is None:
+        w = np.ones_like(alpha)
+    else:
+        assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    # compute neccessary values
+    theta = mean(alpha, w=w, axis=axis)
+
+    # compute skewness
+    if mode == 'pewsey':
+        theta2 = np.tile(theta, (alpha.shape[0],)+ len(theta.shape) * (1,))
+        return np.sum(w * np.sin(2*cdiff(alpha, theta2)), axis=axis)/np.sum(w, axis=axis)
+    elif mode =='fisher':
+        mom = moment(alpha,p=2,w=w,axis=axis, cent=True)
+        mu2, rho2 = np.angle(mom), np.abs(mom)
+        R = resultant_vector_length(alpha,w=w,axis=axis)
+        return rho2*np.sin(cdiff(mu2, 2*theta))/(1-R)**(3./2) #(formula 2.29)
     else:
         raise ValueError("Mode %s not known!" % (mode, ))
 
