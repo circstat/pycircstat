@@ -22,6 +22,14 @@ axis_2arg_test_funcs = [pycircstat.corrcc,
                         pycircstat.corrcl]
 
 
+test_data_2d = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+
 def test_axis_1arg():
     data = np.random.rand(2, 3, 5) * np.pi
     for f in axis_1arg_test_funcs:
