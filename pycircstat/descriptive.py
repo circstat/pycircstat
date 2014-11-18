@@ -271,7 +271,7 @@ def mean_ci_limits(alpha, ci=0.95, w=None, d=None, axis=None):
                       * np.exp(c2 / n[idx2]))  # equ. 26.25
 
     if not np.all(idx | idx2):
-        warnings.warn('Requirements for confidence levels not met.')
+        raise UserWarning('Requirements for confidence levels not met.')
 
     return np.squeeze(np.arccos(t / R))
 

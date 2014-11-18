@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 
 from numpy.testing import assert_allclose
-from nose.tools import assert_equal, assert_true
+from nose.tools import assert_equal, assert_true, assert_raises
 
 import pycircstat
 
@@ -230,6 +230,20 @@ def test_mean_ci_limits():
                     out2, rtol=1e-4)
 
 
+def test_mean_ci_2d_warning():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    muplus = np.array([np.NaN, 2.7003])
+    muminus = np.array([np.NaN, 0.89931])
+    mu = np.array([1.6537, 1.7998])
+
+    assert_raises(UserWarning, pycircstat.mean, data, ci=0.95, axis=0)
+
 def test_mean_ci_2d():
     data = np.array([
                     [0.58429, 0.88333],
@@ -242,10 +256,13 @@ def test_mean_ci_2d():
     muminus = np.array([np.NaN, 0.89931])
     mu = np.array([1.6537, 1.7998])
 
-    mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95, axis=0)
-    assert_allclose(muplus, muplus_tmp, rtol=1e-4)
-    assert_allclose(muminus, muminus_tmp, rtol=1e-4)
-    assert_allclose(mu, mu_tmp, rtol=1e-4)
+    try:
+        mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95, axis=0)
+        assert_allclose(muplus, muplus_tmp, rtol=1e-4)
+        assert_allclose(muminus, muminus_tmp, rtol=1e-4)
+        assert_allclose(mu, mu_tmp, rtol=1e-4)
+    except UserWarning:
+        pass
 
 
 def test_mean_ci_1d():
