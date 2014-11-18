@@ -30,6 +30,11 @@ test_data_2d = np.array([
                     [2.96969, 1.51748],
                     ])
 
+test_data_1d = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                       1.54256458, 5.19290675, 2.18474784,
+                         4.77054777, 1.51736933, 0.72727580])
+
+
 def test_axis_1arg():
     data = np.random.rand(2, 3, 5) * np.pi
     for f in axis_1arg_test_funcs:
@@ -195,8 +200,6 @@ def test_mean_axial():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
                      4.77054777, 1.51736933, 0.72727580])
-
-    # We cannot use `assert_equal`, due to numerical rounding errors.
     assert_allclose(pycircstat.mean(data, axial_correction=3), 0.95902619)
 
 
