@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 
 from numpy.testing import assert_allclose
-from nose.tools import assert_equal, assert_true
+from nose.tools import assert_equal, assert_true, assert_raises
 
 import pycircstat
 
@@ -14,11 +14,25 @@ axis_1arg_test_funcs = [pycircstat.astd,
                         pycircstat.resultant_vector_length,
                         pycircstat.std,
                         pycircstat.var,
+                        pycircstat.skewness,
                         pycircstat.kurtosis,
                         pycircstat.moment]
 
 axis_2arg_test_funcs = [pycircstat.corrcc,
                         pycircstat.corrcl]
+
+
+test_data_2d = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+
+test_data_1d = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                       1.54256458, 5.19290675, 2.18474784,
+                         4.77054777, 1.51736933, 0.72727580])
 
 
 def test_axis_1arg():
@@ -186,8 +200,6 @@ def test_mean_axial():
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
                      1.54256458, 5.19290675, 2.18474784,
                      4.77054777, 1.51736933, 0.72727580])
-
-    # We cannot use `assert_equal`, due to numerical rounding errors.
     assert_allclose(pycircstat.mean(data, axial_correction=3), 0.95902619)
 
 
@@ -218,6 +230,20 @@ def test_mean_ci_limits():
                     out2, rtol=1e-4)
 
 
+def test_mean_ci_2d_warning():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    muplus = np.array([np.NaN, 2.7003])
+    muminus = np.array([np.NaN, 0.89931])
+    mu = np.array([1.6537, 1.7998])
+
+    assert_raises(UserWarning, pycircstat.mean, data, ci=0.95, axis=0)
+
 def test_mean_ci_2d():
     data = np.array([
                     [0.58429, 0.88333],
@@ -230,10 +256,13 @@ def test_mean_ci_2d():
     muminus = np.array([np.NaN, 0.89931])
     mu = np.array([1.6537, 1.7998])
 
-    mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95, axis=0)
-    assert_allclose(muplus, muplus_tmp, rtol=1e-4)
-    assert_allclose(muminus, muminus_tmp, rtol=1e-4)
-    assert_allclose(mu, mu_tmp, rtol=1e-4)
+    try:
+        mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95, axis=0)
+        assert_allclose(muplus, muplus_tmp, rtol=1e-4)
+        assert_allclose(muminus, muminus_tmp, rtol=1e-4)
+        assert_allclose(mu, mu_tmp, rtol=1e-4)
+    except UserWarning:
+        pass
 
 
 def test_mean_ci_1d():
@@ -390,7 +419,7 @@ def test_kurtosis_2d_data_axisNone_fiser():
     assert_allclose(mp, -1.5849, rtol=1e-4)
 
 
-def test_kurtosis_2d_data_axis1_bootstrap():
+def test_kurtosis_2d_data_axisNone_bootstrap():
     "basically only test whether boostrapping does not throw an error"
     data = np.array([
                     [0.58429, 0.88333],
@@ -469,4 +498,84 @@ def test_moment_7():
     # assert_allclose(lo, -0.0871916735424+0.71239443351j, rtol=1e-3)
     # assert_allclose(hi, 0.238513834062+0.140762896499j, rtol=1e-3)
     # not sure of a good way to do tests for bootstraps.
+#---------------------
 
+def test_skewness_basic():
+    """ circ.skewness: test basic call... """
+    data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
+                     1.54256458, 5.19290675, 2.18474784,
+                     4.77054777, 1.51736933, 0.72727580])
+    mp = pycircstat.skewness(data)
+    assert_allclose(mp, 0.40660, rtol=1e-5)
+
+
+def test_skewness_2d_data_axis0():
+    """circ.skewness: test 2D data (axis=0)..."""
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.skewness(data, axis=0)
+    assert_allclose(mp, [-0.29339, -0.14716], rtol=1e-4)
+
+def test_skewness_2d_data_axisNone():
+    """circ.skewness: test 2D data (axis=0)..."""
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.skewness(data)
+    assert_allclose(mp, -0.18157, rtol=1e-4)
+
+def test_skewness_2d_data_axisNone_fiser():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.skewness(data, mode='fisher')
+    assert_allclose(mp, 0.81132, rtol=1e-4)
+
+
+def test_skewness_2d_data_axisNone_bootstrap():
+    "basically only test whether boostrapping does not throw an error"
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp, (low, high) = pycircstat.skewness(data, ci=0.95)
+    assert_allclose(mp, -0.18157, rtol=1e-4)
+
+
+def test_skewness_2d_data_axis1():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.skewness(data, axis=1)
+    assert_allclose(mp,  [-8.3267e-17, 0.0000e+00, -1.3878e-17, 1.3878e-16, 0.0000e+00], atol=1e-4)
+
+def test_skewness_2d_data_axis0_fisher():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp = pycircstat.skewness(data, axis=0, mode='fisher')
+    assert_allclose(mp,  [0.84723, 1.90452], rtol=1e-4)

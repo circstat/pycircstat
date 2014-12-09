@@ -3,7 +3,56 @@ from __future__ import absolute_import
 from scipy.stats import rv_continuous
 import numpy as np
 import sys
+from .decorators import swap2zeroaxis
+from .descriptive import resultant_vector_length
 
+@swap2zeroaxis(['alpha'], [0])
+def kappa(alpha, w=None, axis=None):
+    """
+    Computes an approximation to the ML estimate of the concentration
+    parameter kappa of the von Mises distribution.
+
+
+    :param alpha: angles in radians OR alpha is length resultant
+    :param w: number of incidences in case of binned angle data
+    :param axis: kappa is computed along this axis
+    :return: estimated value of kappa
+
+    References: [Fisher1995]_ p. 88
+    """
+
+    if w is None:
+        w = np.ones_like(alpha)
+    else:
+        assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    n = alpha.shape[axis]
+
+    if n>1:
+        R = resultant_vector_length(alpha,w, axis=axis)
+    else:
+        R = alpha
+
+    kappa = np.asarray(0*R)
+
+    idx = R < 0.53
+    kappa[idx] = 2.*R[idx] + R[idx]**3. + 5*R[idx]**5./6
+
+    idx = (R >= 0.53) & (R < 0.85)
+    kappa[idx] = -.4 + 1.39*R[idx] + 0.43/(1.-R[idx])
+
+    idx = R > 0.85
+    kappa[idx] = 1./(R[idx]**3. - 4.*R[idx]**2. + 3.*R[idx])
+
+    if n < 15 and n > 1:
+        idx = kappa < 2.
+        kappa[idx] = kappa[idx]-2*(n*kappa[idx])**-1.
+        idx0 = kappa < 0
+        kappa[idx & idx0] = 0
+
+        kappa[~idx] = (n-1)**3 * kappa[~idx]/(n**3.+n)
+
+    return kappa
 
 class cardioid_gen(rv_continuous):
     """
