@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import numpy as np
 from scipy import misc
+from scipy import stats
 #import warnings
 from . import descriptive
 from . import utils
@@ -234,3 +235,110 @@ def _critical_value_raospacing(n, U):
         p = .5
 
     return p, Uc
+    
+    
+def vtest(alpha, mu, w=None, d=None, axis=0):
+    """
+    Computes V test for nonuniformity of circular data with a known mean 
+    direction of dir.
+
+    H0: the population is uniformly distributed around the circle
+    HA: the populatoin is not distributed uniformly around the circle but
+        has a mean of mu
+        
+    Note: Not rejecting H0 may mean that the population is uniformly
+    distributed around the circle OR that it has a mode but that this mode
+    is not centered at dir.
+
+    The V test has more power than the Rayleigh test and is preferred if
+    there is reason to believe (before seing the data!!!) in a specific 
+    mean direction. 
+
+
+    :param alpha: sample of angles in radian
+    :param mu:   suspected mean direction
+    :param w:     number of incidences in case of binned angle data
+    :param d:     spacing of bin centers for binned data, if supplied
+                  correction factor is used to correct for bias in
+                  estimation of r
+    :param axis:  compute along this dimension, default is 0
+                  if axis=None, array is raveled
+    :return pval: two-tailed p-value
+    :return v:    value of the v-statistic
+
+    References: [Zar2009]_
+    """
+
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
+
+    if w is None:
+        w = np.ones_like(alpha)
+        
+
+    assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
+
+    r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
+    m = descriptive.mean(alpha,w=w,d=d)
+    n = np.sum(w)
+
+    # compute Rayleigh's R (equ. 27.1)
+    R = n * r
+
+    # compute V and u (equ. 27.5)
+    V = R * np.cos(m-mu)
+    u = V *np.sqrt(2/n)
+
+    # compute p value using approxation in Zar, p. 617
+    pval = 1 - stats.norm.cdf(u)
+
+    return pval, V
+    
+    
+    
+    
+def symtest(alpha, axis=0):
+    """
+    Non-parametric test for symmetry around the median. Works by performing a 
+    Wilcoxon sign rank test on the differences to the median.
+
+    H0: the population is symmetrical around the median
+    HA: the population is not symmetrical around the median
+        
+
+    :param alpha: sample of angles in radian
+    :param axis:  compute along this dimension, default is 0
+                  if axis=None, array is raveled
+    :return pval: two-tailed p-value
+    :return T:    test statistics of underlying wilcoxon test
+   
+
+    References: [Zar2009]_
+    """
+
+    if axis is None:
+        axis = 0
+        alpha = alpha.ravel()
+        
+    m = descriptive.median(alpha)
+    d = descriptive.pairwise_cdiff(m,alpha)
+    
+    T, pval = stats.wilcoxon(d)
+
+
+
+    return pval, T
+    
+
+
+
+
+
+
+
+
+
+
+
+
