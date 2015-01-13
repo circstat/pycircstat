@@ -11,7 +11,8 @@ from . import descriptive
 from . import utils
 
 
-def rayleigh(alpha, w=None, d=None, axis=0):
+
+def rayleigh(alpha, w=None, d=None, axis=None):
     """
     Computes Rayleigh test for non-uniformity of circular data.
 
@@ -26,7 +27,7 @@ def rayleigh(alpha, w=None, d=None, axis=0):
     :param d:     spacing of bin centers for binned data, if supplied
                   correction factor is used to correct for bias in
                   estimation of r
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None
                   if axis=None, array is raveled
     :return pval: two-tailed p-value
     :return z:    value of the z-statistic
@@ -58,7 +59,7 @@ def rayleigh(alpha, w=None, d=None, axis=0):
     return pval, z
 
 
-def omnibus(alpha, w=None, sz=np.radians(1), axis=0):
+def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     """
     Computes omnibus test for non-uniformity of circular data. The test is also
     known as Hodges-Ajne test.
@@ -73,7 +74,7 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=0):
     :param alpha: sample of angles in radian
     :param w:      number of incidences in case of binned angle data
     :param sz:    step size for evaluating distribution, default 1 deg
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None
                   if axis=None, array is raveled
     :return pval: two-tailed p-value
     :return m:    minimum number of samples falling in one half of the circle
@@ -237,7 +238,7 @@ def _critical_value_raospacing(n, U):
     return p, Uc
     
     
-def vtest(alpha, mu, w=None, d=None, axis=0):
+def vtest(alpha, mu, w=None, d=None, axis=None):
     """
     Computes V test for nonuniformity of circular data with a known mean 
     direction of dir.
@@ -261,7 +262,7 @@ def vtest(alpha, mu, w=None, d=None, axis=0):
     :param d:     spacing of bin centers for binned data, if supplied
                   correction factor is used to correct for bias in
                   estimation of r
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None
                   if axis=None, array is raveled
     :return pval: two-tailed p-value
     :return v:    value of the v-statistic
@@ -298,7 +299,7 @@ def vtest(alpha, mu, w=None, d=None, axis=0):
     
     
     
-def symtest(alpha, axis=0):
+def symtest(alpha, axis=None):
     """
     Non-parametric test for symmetry around the median. Works by performing a 
     Wilcoxon sign rank test on the differences to the median.
@@ -308,7 +309,7 @@ def symtest(alpha, axis=0):
         
 
     :param alpha: sample of angles in radian
-    :param axis:  compute along this dimension, default is 0
+    :param axis:  compute along this dimension, default is None
                   if axis=None, array is raveled
     :return pval: two-tailed p-value
     :return T:    test statistics of underlying wilcoxon test
