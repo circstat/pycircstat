@@ -7,11 +7,11 @@ import numpy as np
 from scipy import misc
 from scipy import stats
 #import warnings
-from . import descriptive
+from . import descriptive, swap2zeroaxis
 from . import utils
 
 
-
+@swap2zeroaxis(['alpha','w'], [0, 1])
 def rayleigh(alpha, w=None, d=None, axis=None):
     """
     Computes Rayleigh test for non-uniformity of circular data.
@@ -34,10 +34,9 @@ def rayleigh(alpha, w=None, d=None, axis=None):
 
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
-
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
+    # if axis is None:
+    #     axis = 0
+    #     alpha = alpha.ravel()
 
     if w is None:
         w = np.ones_like(alpha)
@@ -58,7 +57,7 @@ def rayleigh(alpha, w=None, d=None, axis=None):
 
     return pval, z
 
-
+@swap2zeroaxis(['alpha','w'], [0, 1])
 def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     """
     Computes omnibus test for non-uniformity of circular data. The test is also
@@ -114,7 +113,7 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
 
     return pval, m
 
-
+@swap2zeroaxis(['alpha'], [0, 1, 2])
 def raospacing(alpha, axis=None):
     """
     Calculates Rao's spacing test by comparing distances between points on
@@ -237,7 +236,7 @@ def _critical_value_raospacing(n, U):
 
     return p, Uc
     
-    
+@swap2zeroaxis(['alpha','w'], [0, 1])
 def vtest(alpha, mu, w=None, d=None, axis=None):
     """
     Computes V test for nonuniformity of circular data with a known mean 
@@ -270,14 +269,9 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     References: [Zar2009]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
-
     if w is None:
         w = np.ones_like(alpha)
         
-
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
@@ -298,7 +292,7 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     
     
     
-    
+@swap2zeroaxis(['alpha'], [0, 1])
 def symtest(alpha, axis=None):
     """
     Non-parametric test for symmetry around the median. Works by performing a 
@@ -318,14 +312,12 @@ def symtest(alpha, axis=None):
     References: [Zar2009]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
-        
-    m = descriptive.median(alpha)
+    # TODO: fix the dimension problem
+    m = descriptive.median(alpha, axis=axis)
     d = descriptive.pairwise_cdiff(m,alpha)
-    
-    T, pval = stats.wilcoxon(d)
+
+    T, pval = map(np.asarray, zip(*[stats.wilcoxon(dd) for dd in d]))
+    #T, pval = stats.wilcoxon(d)
 
 
 

@@ -177,6 +177,7 @@ def pairwise_cdiff(alpha, beta=None):
     if beta is None:
         beta = alpha
 
+
     # advanced slicing and broadcasting to make pairwise distance work
     # between arbitrary nd arrays
     reshaper_alpha = len(alpha.shape) * (slice(None, None),) + \

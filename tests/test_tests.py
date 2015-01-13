@@ -59,4 +59,8 @@ def test_symtest():
         0.20612467,  1.38484181,  1.72546928,  3.33570062,  3.96191276])
     p, T = pycircstat.tests.symtest(data)
     assert_allclose(0.295877, p, atol=0.001, rtol=0.001)
-    
+
+def test_symtest():
+    data = np.random.rand(10,20)*np.pi*2.
+    p, T = pycircstat.tests.symtest(data, axis=0)
+    assert_true(p.shape == (20,))

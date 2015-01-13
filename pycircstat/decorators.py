@@ -102,14 +102,18 @@ class swap2zeroaxis:
             # adjust axes or flatten
             if axis is not None:
                 for i in to_swap_idx:
-                    args[i] = args[i].swapaxes(0, axis)
+                    if args[i] is not None:
+                        args[i] = args[i].swapaxes(0, axis)
                 for k in to_swap_keys:
-                    kwargs[k] = kwargs[k].swapaxes(0, axis)
+                    if kwargs[k] is not None:
+                        kwargs[k] = kwargs[k].swapaxes(0, axis)
             else:
                 for i in to_swap_idx:
-                    args[i] = args[i].ravel()
+                    if args[i] is not None:
+                        args[i] = args[i].ravel()
                 for k in to_swap_keys:
-                    kwargs[k] = kwargs[k].ravel()
+                    if kwargs[k] is not None:
+                        kwargs[k] = kwargs[k].ravel()
 
             # compute function
             outputs = f(*args, **kwargs)

@@ -32,10 +32,12 @@ def kappa(alpha, w=None, axis=None):
         R = resultant_vector_length(alpha,w, axis=axis)
     else:
         R = alpha
+    R = np.atleast_1d(R)
 
     kappa = np.asarray(0*R)
 
     idx = R < 0.53
+
     kappa[idx] = 2.*R[idx] + R[idx]**3. + 5*R[idx]**5./6
 
     idx = (R >= 0.53) & (R < 0.85)
