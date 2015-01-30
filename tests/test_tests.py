@@ -60,7 +60,26 @@ def test_symtest():
     p, T = pycircstat.tests.symtest(data)
     assert_allclose(0.295877, p, atol=0.001, rtol=0.001)
 
-def test_symtest():
-    data = np.random.rand(10,20)*np.pi*2.
+def test_symtest2():
+    data = np.random.rand(10,20,5)*np.pi*2.
     p, T = pycircstat.tests.symtest(data, axis=0)
-    assert_true(p.shape == (20,))
+    assert_true(p.shape == (20,5))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            p2, T2 = pycircstat.tests.symtest(data[:,i,j])
+            assert_equal(p[i,j], p2)
+            assert_equal(T[i,j], T2)
+
+def test_symtest3():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, T = pycircstat.tests.symtest(data, axis=1)
+    assert_true(p.shape == (10,5))
+    for i in range(data.shape[0]):
+        for j in range(data.shape[2]):
+            p2, T2 = pycircstat.tests.symtest(data[i,:,j])
+            assert_equal(p[i,j], p2)
+            assert_equal(T[i,j], T2)
+
+
+if __name__=="__main__":
+    test_symtest3()

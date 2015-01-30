@@ -312,13 +312,16 @@ def symtest(alpha, axis=None):
     References: [Zar2009]_
     """
 
-    # TODO: fix the dimension problem
     m = descriptive.median(alpha, axis=axis)
-    d = descriptive.pairwise_cdiff(m,alpha)
 
-    T, pval = map(np.asarray, zip(*[stats.wilcoxon(dd) for dd in d]))
-    #T, pval = stats.wilcoxon(d)
+    d = np.angle(np.exp(1j * m[np.newaxis]) / np.exp(1j * alpha))
 
+    if axis is not None:
+        oshape = d.shape[1:]
+        d2 = d.reshape((d.shape[0], np.prod(d.shape[1:])))
+        T, pval = map(lambda x: np.asarray(x).reshape(oshape), zip(*[stats.wilcoxon(dd) for dd in d2.T]))
+    else:
+        T, pval = stats.wilcoxon(d)
 
 
     return pval, T
