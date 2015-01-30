@@ -18,6 +18,16 @@ def test_rayleigh():
     assert_allclose(0.0400878, p, atol=0.001, rtol=0.001)
     assert_allclose(3.1678, z, atol=0.001, rtol=0.001)
 
+def test_rayleightest2():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, z = pycircstat.tests.rayleigh(data, axis=0)
+    assert_true(p.shape == (20,5))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            p2, z2 = pycircstat.tests.rayleigh(data[:,i,j])
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(z[i,j], z2, atol=0.001, rtol=0.001)
+
 
 def test_omnibus():
     data = np.array([
@@ -103,4 +113,4 @@ def test_symtest3():
 
 if __name__=="__main__":
 #    test_vtest()
-    test_vtest3()
+    test_rayleightest2()

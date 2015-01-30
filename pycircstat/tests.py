@@ -44,7 +44,7 @@ def rayleigh(alpha, w=None, d=None, axis=None):
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
-    n = np.sum(w)
+    n = np.sum(w, axis=axis)
 
     # compute Rayleigh's R (equ. 27.1)
     R = n * r
@@ -288,8 +288,7 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
 
     return pval, V
     
-    
-    
+
 @swap2zeroaxis(['alpha'], [0, 1])
 def symtest(alpha, axis=None):
     """
