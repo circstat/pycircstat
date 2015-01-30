@@ -251,7 +251,7 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     is not centered at dir.
 
     The V test has more power than the Rayleigh test and is preferred if
-    there is reason to believe (before seing the data!!!) in a specific 
+    there is reason to believe (before seeing the data!) in a specific
     mean direction. 
 
 
@@ -271,12 +271,11 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
 
     if w is None:
         w = np.ones_like(alpha)
-        
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
-    m = descriptive.mean(alpha,w=w,d=d)
-    n = np.sum(w)
+    m = descriptive.mean(alpha,w=w,d=d, axis=axis)
+    n = np.sum(w, axis=axis)
 
     # compute Rayleigh's R (equ. 27.1)
     R = n * r
@@ -284,7 +283,6 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     # compute V and u (equ. 27.5)
     V = R * np.cos(m-mu)
     u = V *np.sqrt(2/n)
-
     # compute p value using approxation in Zar, p. 617
     pval = 1 - stats.norm.cdf(u)
 

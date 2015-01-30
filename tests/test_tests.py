@@ -50,7 +50,27 @@ def test_vtest():
     p, V = pycircstat.tests.vtest(data,0)
     assert_allclose(0.1074, p, atol=0.001, rtol=0.001)
     assert_allclose(3.9230, V, atol=0.001, rtol=0.001)
-    
+
+def test_vtest2():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, V = pycircstat.tests.vtest(data, 0, axis=0)
+    assert_true(p.shape == (20,5))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            p2, V2 = pycircstat.tests.vtest(data[:,i,j], 0)
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(V[i,j], V2, atol=0.001, rtol=0.001)
+
+def test_vtest3():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, V = pycircstat.tests.vtest(data, 0, axis=1)
+    assert_true(p.shape == (10,5))
+    for i in range(data.shape[0]):
+        for j in range(data.shape[2]):
+            p2, V2 = pycircstat.tests.vtest(data[i,:,j], 0)
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(V[i,j], V2, atol=0.001, rtol=0.001)
+
 def test_symtest():
     data = np.array([
         -1.78277804,  0.20180845, -1.51291097,  0.57329272,  0.72195959,
@@ -82,4 +102,5 @@ def test_symtest3():
 
 
 if __name__=="__main__":
-    test_symtest3()
+#    test_vtest()
+    test_vtest3()
