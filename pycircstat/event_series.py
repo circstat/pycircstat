@@ -1,6 +1,5 @@
 import numpy as np
 from scipy import stats
-from IPython import embed
 
 
 def concolve_dirac_gauss(t, trial, sigma=1.):
