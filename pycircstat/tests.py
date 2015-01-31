@@ -145,24 +145,24 @@ def raospacing(alpha, axis=None):
     References: [Batschelet1981]_, [RusselLevitin1995]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
+    # if axis is None:
+    #     axis = 0
+    #     alpha = alpha.ravel()
 
     alpha = np.degrees(alpha)
-    alpha = np.sort(alpha)
+    alpha = np.sort(alpha, axis=axis)
 
     n = alpha.shape[axis]
     assert n >= 4, 'Rao spacing test requires at least 4 samples'
 
-    # compute test statistic
-    U = 0
+    # compute test statistic along 0 dimension (swap2zeroaxis)
+    U = 0.
     kappa = 360 / n
     for j in range(0, n - 1):
-        ti = alpha[j + 1] - alpha[j]
+        ti = alpha[j + 1,...] - alpha[j,...]
         U = U + np.abs(ti - kappa)
 
-    tn = 360 - alpha[-1] + alpha[0]
+    tn = 360 - alpha[-1,...] + alpha[0,...]
     U = U + abs(tn - kappa)
 
     U = .5 * U
@@ -224,17 +224,25 @@ def _critical_value_raospacing(n, U):
         1000,  140.99, 138.84, 136.94, 135.92])
     table = table.reshape((-1, 5))
 
-    ridx = (table[:, 0] >= n).argmax()
-    cidx = (table[ridx, 1:] < U).argmax()
+    if not hasattr(U,'shape'):
+        U = np.array(U)
 
-    if (cidx > 0) | ((cidx == 0) & (table[ridx, cidx + 1] < U)):
-        Uc = table[ridx, cidx + 1]
-        p = alpha_level[cidx]
-    else:
-        Uc = table[ridx, -1]
-        p = .5
+    old_shape = U.shape
+    U = U.ravel()
+    Uc, p = 0*U, 0*U
 
-    return p, Uc
+    for i, loop_u in enumerate(U):
+        ridx = (table[:, 0] >= n).argmax()
+        cidx = (table[ridx, 1:] < loop_u).argmax()
+
+        if (cidx > 0) | ((cidx == 0) & (table[ridx, cidx + 1] < loop_u)):
+            Uc[i] = table[ridx, cidx + 1]
+            p[i] = alpha_level[cidx]
+        else:
+            Uc[i] = table[ridx, -1]
+            p[i] = .5
+
+    return p.reshape(old_shape), Uc.reshape(old_shape)
     
 @swap2zeroaxis(['alpha','w'], [0, 1])
 def vtest(alpha, mu, w=None, d=None, axis=None):

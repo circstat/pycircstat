@@ -28,6 +28,16 @@ def test_rayleightest2():
             assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
             assert_allclose(z[i,j], z2, atol=0.001, rtol=0.001)
 
+def test_rayleightest3():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, z = pycircstat.tests.rayleigh(data, axis=1)
+    assert_true(p.shape == (10,5))
+    for i in range(data.shape[0]):
+        for j in range(data.shape[2]):
+            p2, z2 = pycircstat.tests.rayleigh(data[i,:,j])
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(z[i,j], z2, atol=0.001, rtol=0.001)
+
 
 def test_omnibus():
     data = np.array([
@@ -50,7 +60,33 @@ def test_raospacing():
     assert_allclose(0.001, p, atol=0.0001, rtol=0.001)
     assert_allclose(233.7789, U, atol=0.001, rtol=0.001)
     assert_allclose(192.17, Uc, atol=0.001, rtol=0.001)
-    
+
+def test_raospacing2():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, U, Uc = pycircstat.tests.raospacing(data, axis=0)
+    assert_true(p.shape == (20,5))
+    assert_true(U.shape == (20,5))
+    assert_true(Uc.shape == (20,5))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            p2, U2, Uc2 = pycircstat.tests.raospacing(data[:,i,j])
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(U[i,j], U2, atol=0.001, rtol=0.001)
+            assert_allclose(Uc[i,j], Uc2, atol=0.001, rtol=0.001)
+
+def test_raospacing3():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, U, Uc = pycircstat.tests.raospacing(data, axis=1)
+    assert_true(p.shape == (10,5))
+    assert_true(U.shape == (10,5))
+    assert_true(Uc.shape == (10,5))
+    for i in range(data.shape[0]):
+        for j in range(data.shape[2]):
+            p2, U2, Uc2 = pycircstat.tests.raospacing(data[i,:,j])
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(U[i,j], U2, atol=0.001, rtol=0.001)
+            assert_allclose(Uc[i,j], Uc2, atol=0.001, rtol=0.001)
+
 def test_vtest():
     data = np.array([
         -1.78277804,  0.20180845, -1.51291097,  0.57329272,  0.72195959,
@@ -110,7 +146,5 @@ def test_symtest3():
             assert_equal(p[i,j], p2)
             assert_equal(T[i,j], T2)
 
-
 if __name__=="__main__":
-#    test_vtest()
-    test_rayleightest2()
+    test_raospacing3()
