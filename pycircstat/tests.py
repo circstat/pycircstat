@@ -7,11 +7,11 @@ import numpy as np
 from scipy import misc
 from scipy import stats
 #import warnings
-from . import descriptive
+from . import descriptive, swap2zeroaxis
 from . import utils
 
 
-
+@swap2zeroaxis(['alpha','w'], [0, 1])
 def rayleigh(alpha, w=None, d=None, axis=None):
     """
     Computes Rayleigh test for non-uniformity of circular data.
@@ -34,10 +34,9 @@ def rayleigh(alpha, w=None, d=None, axis=None):
 
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
-
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
+    # if axis is None:
+    #     axis = 0
+    #     alpha = alpha.ravel()
 
     if w is None:
         w = np.ones_like(alpha)
@@ -45,7 +44,7 @@ def rayleigh(alpha, w=None, d=None, axis=None):
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
-    n = np.sum(w)
+    n = np.sum(w, axis=axis)
 
     # compute Rayleigh's R (equ. 27.1)
     R = n * r
@@ -58,7 +57,7 @@ def rayleigh(alpha, w=None, d=None, axis=None):
 
     return pval, z
 
-
+@swap2zeroaxis(['alpha','w'], [0, 1])
 def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     """
     Computes omnibus test for non-uniformity of circular data. The test is also
@@ -82,39 +81,42 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
-
     if w is None:
         w = np.ones_like(alpha)
 
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     alpha = alpha % (2 * np.pi)
-    n = np.sum(w)
+    n = np.sum(w, axis=axis)
+
     dg = np.arange(0, np.pi, np.radians(1))
 
-    m1 = np.zeros_like(dg)
-    m2 = np.zeros_like(dg)
+    m1 = np.zeros((len(dg),) + alpha.shape[1:])
+    m2 = np.zeros((len(dg),) + alpha.shape[1:])
+
 
     for i, dg_val in enumerate(dg):
-        m1[i] = np.sum(w[(alpha > dg_val) & (alpha < np.pi + dg_val)])
-        m2[i] = n - m1[i]
+        m1[i,...] = np.sum(w * ((alpha > dg_val) & (alpha < np.pi + dg_val)), axis=axis)
+        m2[i,...] = n - m1[i,...]
 
-    m = np.hstack((m1, m2)).min()
+    m = np.concatenate((m1, m2), axis=0).min(axis=axis)
 
-    if n > 50:
-        # approximation by Ajne (1968)
-        A = np.pi * np.sqrt(n) / 2 / (n - 2 * m)
-        pval = np.sqrt(2 * np.pi) / A * np.exp(-np.pi ** 2 / 8 / A ** 2)
-    else:
-        # exact formula by Hodges (1955)
-        pval = 2 ** (1 - n) * (n - 2 * m) * misc.comb(n, m)
+    n = np.atleast_1d(n)
+    m = np.atleast_1d(m)
+    A = np.empty_like(n)
+    pval = np.empty_like(n)
+    idx50 = (n > 50)
 
-    return pval, m
+    if np.any(idx50):
+        A[idx50] = np.pi * np.sqrt(n[idx50]) / 2 / (n[idx50] - 2 * m[idx50])
+        pval[idx50] = np.sqrt(2 * np.pi) / A[idx50] * np.exp(-np.pi ** 2 / 8 / A[idx50] ** 2)
 
+    if np.any(~idx50):
+        pval[~idx50] = 2 ** (1 - n[~idx50]) * (n[~idx50] - 2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50])
 
+    return pval.squeeze(), m
+
+@swap2zeroaxis(['alpha'], [0, 1, 2])
 def raospacing(alpha, axis=None):
     """
     Calculates Rao's spacing test by comparing distances between points on
@@ -146,24 +148,21 @@ def raospacing(alpha, axis=None):
     References: [Batschelet1981]_, [RusselLevitin1995]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
 
     alpha = np.degrees(alpha)
-    alpha = np.sort(alpha)
+    alpha = np.sort(alpha, axis=axis)
 
     n = alpha.shape[axis]
     assert n >= 4, 'Rao spacing test requires at least 4 samples'
 
-    # compute test statistic
-    U = 0
+    # compute test statistic along 0 dimension (swap2zeroaxis)
+    U = 0.
     kappa = 360 / n
     for j in range(0, n - 1):
-        ti = alpha[j + 1] - alpha[j]
+        ti = alpha[j + 1,...] - alpha[j,...]
         U = U + np.abs(ti - kappa)
 
-    tn = 360 - alpha[-1] + alpha[0]
+    tn = 360 - alpha[-1,...] + alpha[0,...]
     U = U + abs(tn - kappa)
 
     U = .5 * U
@@ -225,19 +224,27 @@ def _critical_value_raospacing(n, U):
         1000,  140.99, 138.84, 136.94, 135.92])
     table = table.reshape((-1, 5))
 
-    ridx = (table[:, 0] >= n).argmax()
-    cidx = (table[ridx, 1:] < U).argmax()
+    if not hasattr(U,'shape'):
+        U = np.array(U)
 
-    if (cidx > 0) | ((cidx == 0) & (table[ridx, cidx + 1] < U)):
-        Uc = table[ridx, cidx + 1]
-        p = alpha_level[cidx]
-    else:
-        Uc = table[ridx, -1]
-        p = .5
+    old_shape = U.shape
+    U = U.ravel()
+    Uc, p = 0*U, 0*U
 
-    return p, Uc
+    for i, loop_u in enumerate(U):
+        ridx = (table[:, 0] >= n).argmax()
+        cidx = (table[ridx, 1:] < loop_u).argmax()
+
+        if (cidx > 0) | ((cidx == 0) & (table[ridx, cidx + 1] < loop_u)):
+            Uc[i] = table[ridx, cidx + 1]
+            p[i] = alpha_level[cidx]
+        else:
+            Uc[i] = table[ridx, -1]
+            p[i] = .5
+
+    return p.reshape(old_shape), Uc.reshape(old_shape)
     
-    
+@swap2zeroaxis(['alpha','w'], [0, 1])
 def vtest(alpha, mu, w=None, d=None, axis=None):
     """
     Computes V test for nonuniformity of circular data with a known mean 
@@ -252,7 +259,7 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     is not centered at dir.
 
     The V test has more power than the Rayleigh test and is preferred if
-    there is reason to believe (before seing the data!!!) in a specific 
+    there is reason to believe (before seeing the data!) in a specific
     mean direction. 
 
 
@@ -270,19 +277,13 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     References: [Zar2009]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
-
     if w is None:
         w = np.ones_like(alpha)
-        
-
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     r = descriptive.resultant_vector_length(alpha, w=w, d=d, axis=axis)
-    m = descriptive.mean(alpha,w=w,d=d)
-    n = np.sum(w)
+    m = descriptive.mean(alpha,w=w,d=d, axis=axis)
+    n = np.sum(w, axis=axis)
 
     # compute Rayleigh's R (equ. 27.1)
     R = n * r
@@ -290,15 +291,13 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
     # compute V and u (equ. 27.5)
     V = R * np.cos(m-mu)
     u = V *np.sqrt(2/n)
-
     # compute p value using approxation in Zar, p. 617
     pval = 1 - stats.norm.cdf(u)
 
     return pval, V
     
-    
-    
-    
+
+@swap2zeroaxis(['alpha'], [0, 1])
 def symtest(alpha, axis=None):
     """
     Non-parametric test for symmetry around the median. Works by performing a 
@@ -318,15 +317,16 @@ def symtest(alpha, axis=None):
     References: [Zar2009]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
-        
-    m = descriptive.median(alpha)
-    d = descriptive.pairwise_cdiff(m,alpha)
-    
-    T, pval = stats.wilcoxon(d)
+    m = descriptive.median(alpha, axis=axis)
 
+    d = np.angle(np.exp(1j * m[np.newaxis]) / np.exp(1j * alpha))
+
+    if axis is not None:
+        oshape = d.shape[1:]
+        d2 = d.reshape((d.shape[0], np.prod(d.shape[1:])))
+        T, pval = map(lambda x: np.asarray(x).reshape(oshape), zip(*[stats.wilcoxon(dd) for dd in d2.T]))
+    else:
+        T, pval = stats.wilcoxon(d)
 
 
     return pval, T
