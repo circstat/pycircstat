@@ -81,37 +81,40 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
 
-    if axis is None:
-        axis = 0
-        alpha = alpha.ravel()
-
     if w is None:
         w = np.ones_like(alpha)
 
     assert w.shape == alpha.shape, "Dimensions of alpha and w must match"
 
     alpha = alpha % (2 * np.pi)
-    n = np.sum(w)
+    n = np.sum(w, axis=axis)
+
     dg = np.arange(0, np.pi, np.radians(1))
 
-    m1 = np.zeros_like(dg)
-    m2 = np.zeros_like(dg)
+    m1 = np.zeros((len(dg),) + alpha.shape[1:])
+    m2 = np.zeros((len(dg),) + alpha.shape[1:])
+
 
     for i, dg_val in enumerate(dg):
-        m1[i] = np.sum(w[(alpha > dg_val) & (alpha < np.pi + dg_val)])
-        m2[i] = n - m1[i]
+        m1[i,...] = np.sum(w * ((alpha > dg_val) & (alpha < np.pi + dg_val)), axis=axis)
+        m2[i,...] = n - m1[i,...]
 
-    m = np.hstack((m1, m2)).min()
+    m = np.concatenate((m1, m2), axis=0).min(axis=axis)
 
-    if n > 50:
-        # approximation by Ajne (1968)
-        A = np.pi * np.sqrt(n) / 2 / (n - 2 * m)
-        pval = np.sqrt(2 * np.pi) / A * np.exp(-np.pi ** 2 / 8 / A ** 2)
-    else:
-        # exact formula by Hodges (1955)
-        pval = 2 ** (1 - n) * (n - 2 * m) * misc.comb(n, m)
+    n = np.atleast_1d(n)
+    m = np.atleast_1d(m)
+    A = np.empty_like(n)
+    pval = np.empty_like(n)
+    idx50 = (n > 50)
 
-    return pval, m
+    if np.any(idx50):
+        A[idx50] = np.pi * np.sqrt(n[idx50]) / 2 / (n[idx50] - 2 * m[idx50])
+        pval[idx50] = np.sqrt(2 * np.pi) / A[idx50] * np.exp(-np.pi ** 2 / 8 / A[idx50] ** 2)
+
+    if np.any(~idx50):
+        pval[~idx50] = 2 ** (1 - n[~idx50]) * (n[~idx50] - 2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50])
+
+    return pval.squeeze(), m
 
 @swap2zeroaxis(['alpha'], [0, 1, 2])
 def raospacing(alpha, axis=None):
@@ -145,9 +148,6 @@ def raospacing(alpha, axis=None):
     References: [Batschelet1981]_, [RusselLevitin1995]_
     """
 
-    # if axis is None:
-    #     axis = 0
-    #     alpha = alpha.ravel()
 
     alpha = np.degrees(alpha)
     alpha = np.sort(alpha, axis=axis)

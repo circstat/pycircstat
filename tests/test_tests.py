@@ -49,6 +49,28 @@ def test_omnibus():
     assert_allclose(0.295715, p, atol=0.001, rtol=0.001)
     assert_equal(5, m)
 
+def test_omnibus2():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, m = pycircstat.tests.omnibus(data, axis=0)
+    assert_true(p.shape == (20,5))
+    assert_true(m.shape == (20,5))
+    for i in range(data.shape[1]):
+        for j in range(data.shape[2]):
+            p2, m2 = pycircstat.tests.omnibus(data[:,i,j])
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(m[i,j], m2, atol=0.001, rtol=0.001)
+
+def test_omnibus3():
+    data = np.random.rand(10,20,5)*np.pi*2.
+    p, m = pycircstat.tests.omnibus(data, axis=1)
+    assert_true(p.shape == (10,5))
+    assert_true(m.shape == (10,5))
+    for i in range(data.shape[0]):
+        for j in range(data.shape[2]):
+            p2, m2 = pycircstat.tests.omnibus(data[i,:,j])
+            assert_allclose(p[i,j], p2, atol=0.001, rtol=0.001)
+            assert_allclose(m[i,j], m2, atol=0.001, rtol=0.001)
+
 
 def test_raospacing():
     data = np.array([
@@ -146,5 +168,3 @@ def test_symtest3():
             assert_equal(p[i,j], p2)
             assert_equal(T[i,j], T2)
 
-if __name__=="__main__":
-    test_raospacing3()
