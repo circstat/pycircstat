@@ -305,6 +305,8 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None,
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
+        if w is not None:
+            w = w.ravel()
 
     cmean = _complex_mean(alpha, w=w, axis=axis,
                           axial_correction=axial_correction)
@@ -430,6 +432,9 @@ def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
+        if w is not None:
+            w = w.ravel()
+
 
     if w is None:
         w = np.ones_like(alpha)
@@ -464,6 +469,9 @@ def std(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
+        if w is not None:
+            w = w.ravel()
+
     if w is None:
         w = np.ones_like(alpha)
 
@@ -497,6 +505,9 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
+        if w is not None:
+            w = w.ravel()
+
 
     if w is None:
         w = np.ones_like(alpha)
@@ -527,6 +538,10 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
     if axis is None:
         axis = 0
         alpha = alpha.ravel()
+        if w is not None:
+            w = w.ravel()
+
+
 
     if w is None:
         w = np.ones_like(alpha)
