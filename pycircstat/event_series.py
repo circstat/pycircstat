@@ -2,7 +2,7 @@ import numpy as np
 from scipy import stats
 
 
-def concolve_dirac_gauss(t, trial, sigma=1.):
+def convolve_dirac_gauss(t, trial, sigma=1.):
     """
     Convolves event series represented as time points of Dirac deltas with
     the pdf of a Gaussian
@@ -53,7 +53,7 @@ def vector_strength_spectrum(event_times, sampling_rate, time=None):
     w = np.fft.fftfreq(len(t), d=dt)
     sigma = 1./2./np.pi/sampling_rate*8
 
-    x = concolve_dirac_gauss(t,  event_times, sigma=sigma)
+    x = convolve_dirac_gauss(t,  event_times, sigma=sigma)
 
     a = np.abs(np.fft.fft(x))*dt / len(event_times)
     a[w==0] = np.NaN

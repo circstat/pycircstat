@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from scipy import stats
 
 from scipy.stats import rv_continuous
 import numpy as np
@@ -178,3 +179,6 @@ class triangular_gen(rv_continuous):
 
 if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
     triangular = triangular_gen(name='triangular', a=0, b=2. * np.pi, shapes="rho")
+
+# wrapper for von Mises
+vonmises = stats.vonmises
