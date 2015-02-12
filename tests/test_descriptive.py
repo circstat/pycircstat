@@ -3,7 +3,7 @@ from __future__ import absolute_import
 import numpy as np
 
 from numpy.testing import assert_allclose
-from nose.tools import assert_equal, assert_true, assert_raises
+from nose.tools import assert_equal, assert_true, assert_raises, raises
 
 import pycircstat
 
@@ -56,6 +56,33 @@ def test_axis_2arg():
                 assert_true(isinstance(ret, np.ndarray) or np.isscalar(ret))
             else:
                 assert_equal(ret.shape, data.shape[:a] + data.shape[a + 1:])
+
+@raises(ValueError)
+def test_bootstrap():
+    """Tests whether wrong scale raises ValueError"""
+    @pycircstat.descriptive.bootstrap(1, 'wrongscale')
+    def testfunc(alpha, axis=None, ci=None, bootstrap_iter=100):
+        return np.array(0)
+
+    testfunc(np.array([0,1,2.3,3]), ci=.8)
+
+@raises(ValueError)
+def test_bootstrap():
+    """Tests whether missing bootstrap_iter raises ValueError"""
+    @pycircstat.descriptive.bootstrap(1, 'circular')
+    def testfunc(alpha, axis=None, ci=None):
+        return np.array(0)
+
+    testfunc(np.array([0,1,2.3,3]), ci=.8)
+
+@raises(ValueError)
+def test_bootstrap():
+    """Tests whether missing axis raises ValueError"""
+    @pycircstat.descriptive.bootstrap(1, 'circular')
+    def testfunc(alpha, bootstrap_iter=100, ci=None):
+        return np.array(0)
+
+    testfunc(np.array([0,1,2.3,3]), ci=.8)
 
 
 def test_var():
@@ -431,6 +458,18 @@ def test_kurtosis_2d_data_axisNone_bootstrap():
     mp, (low, high) = pycircstat.kurtosis(data, ci=0.95)
     assert_allclose(mp, -0.013320, rtol=1e-4)
 
+def test_kurtosis_2d_data_axisNone_bootstrap_kw():
+    "basically only test whether boostrapping does not throw an error"
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    mp, (low, high) = pycircstat.kurtosis(alpha=data, ci=0.95)
+    assert_allclose(mp, -0.013320, rtol=1e-4)
+
 
 def test_kurtosis_2d_data_axis1():
     data = np.array([
@@ -579,3 +618,5 @@ def test_skewness_2d_data_axis0_fisher():
                     ])
     mp = pycircstat.skewness(data, axis=0, mode='fisher')
     assert_allclose(mp,  [0.84723, 1.90452], rtol=1e-4)
+
+
