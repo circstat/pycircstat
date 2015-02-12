@@ -185,5 +185,3 @@ def test_watson_williams_nd():
     assert_allclose(p, 0.1870637, atol=0.0001, rtol=0.0001)
 
 
-if __name__=="__main__":
-    test_watson_williams_nd()

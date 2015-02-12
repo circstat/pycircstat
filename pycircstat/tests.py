@@ -3,6 +3,7 @@ Statistical tests
 """
 from __future__ import absolute_import
 import warnings
+from nose.tools import nottest
 
 import numpy as np
 from scipy import misc
@@ -334,7 +335,7 @@ def symtest(alpha, axis=None):
 
     return pval, T
 
-
+@nottest
 def watson_williams_test(*args, **kwargs):
     """
     Parametric Watson-Williams multi-sample test for equal means. Can be
@@ -372,8 +373,6 @@ def watson_williams_test(*args, **kwargs):
             assert ww.shape == alpha.shape, "w[%i] and argument %i must have same shape" % (i, i)
     else:
         w = [np.ones_like(a) for a in args]
-        print(args)
-        print([ww.shape for ww in w])
 
     if axis is None:
         alpha = list(map(np.ravel, args))
