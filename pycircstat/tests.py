@@ -374,15 +374,17 @@ def watson_williams_test(*args, **kwargs):
         w = [np.ones_like(a) for a in args]
 
     if axis is None:
-        alpha = map(np.ravel, args)
-        w = map(np.ravel, w)
+        alpha = list(map(np.ravel, args))
+        w = list(map(np.ravel, w))
     else:
         alpha = args
 
     k = len(args)
 
-    ni = np.asarray(map(lambda x: np.sum(x, axis=axis), w))
+    #np.asarray(list())
+    ni = list(map(lambda x: np.sum(x, axis=axis), w))
     ri = np.asarray([descriptive.resultant_vector_length(a, ww, axis=axis) for a, ww in zip(alpha, w)])
+
     r = descriptive.resultant_vector_length(np.concatenate(alpha, axis=axis), np.concatenate(w, axis=axis), axis=axis)
     n = sum(ni)  # this must not be the numpy sum since the arrays are to be summed
 
