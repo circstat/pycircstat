@@ -620,3 +620,5 @@ def test_skewness_2d_data_axis0_fisher():
     assert_allclose(mp,  [0.84723, 1.90452], rtol=1e-4)
 
 
+if __name__=="__main__":
+    test_median_ci()

@@ -45,11 +45,14 @@ class bootstrap:
             val = args[what_idx]
             if remove:
                 args[what_idx] = default
-        elif what in kwargs:
-            if remove:
-                val = kwargs.pop(what, default)
-            else:
-                val = kwargs[what]
+        # this part is actually never called since decocator seems to convert everything
+        # positional arguments. Therefore, I just commented, but did not remove this piece
+        # of code since it might be called with keyword arguments under certain circumstances.
+        # elif what in kwargs:
+        #     if remove:
+        #         val = kwargs.pop(what, default)
+        #     else:
+        #         val = kwargs[what]
         else:
             val = default
 
