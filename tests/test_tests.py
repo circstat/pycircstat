@@ -168,3 +168,20 @@ def test_symtest3():
             assert_equal(p[i,j], p2)
             assert_equal(T[i,j], T2)
 
+
+def test_watson_williams():
+    dat1 = np.radians([135., 145, 125, 140, 165, 170])
+    dat2 = np.radians([150,130,175,190,180,220])
+    dat3 = np.radians([140,165,185,180,125,175,140])
+    p, T = pycircstat.watson_williams_test(dat1, dat2, dat3)
+    assert_allclose(p, 0.1870637, atol=0.001, rtol=0.001)
+
+def test_watson_williams_nd():
+    dat1 = np.tile(np.radians([135., 145, 125, 140, 165, 170]),(3,4,1))
+    dat2 = np.tile(np.radians([150,130,175,190,180,220]),(3,4,1))
+    dat3 = np.tile(np.radians([140,165,185,180,125,175,140]),(3,4,1))
+    p, T = pycircstat.watson_williams_test(dat1, dat2, dat3, axis=2)
+    assert_true(p.shape == (3,4), "return pvalue array does not have right shape")
+    assert_allclose(p, 0.1870637, atol=0.0001, rtol=0.0001)
+
+

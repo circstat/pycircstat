@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from scipy import stats
 
 from scipy.stats import rv_continuous
 import numpy as np
@@ -112,7 +113,7 @@ class cardioid_gen(rv_continuous):
         return (2 * rho * np.sin(x - mu) + x + 2 * rho * np.sin(mu)) / 2 / np.pi
 
 if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
-    cardioid = cardioid_gen(name='cardioid', a=0, b=2. * np.pi, shapes="mu, rho")
+    cardioid = cardioid_gen(name='cardioid',  shapes="mu, rho")
 
 
 class triangular_gen(rv_continuous):
@@ -177,4 +178,7 @@ class triangular_gen(rv_continuous):
         return ret
 
 if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
-    triangular = triangular_gen(name='triangular', a=0, b=2. * np.pi, shapes="rho")
+    triangular = triangular_gen(name='triangular', shapes="rho")
+
+# wrapper for von Mises
+vonmises = stats.vonmises
