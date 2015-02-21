@@ -540,7 +540,7 @@ def _sample_cdf(alpha, resolution=100., axis=None):
     old_shape = alpha.shape
     alpha = alpha % (2 * np.pi)
 
-    alpha = alpha.reshape((alpha.shape[0], np.prod(alpha.shape[1:]))).T
+    alpha = alpha.reshape((alpha.shape[0], int(np.prod(alpha.shape[1:])))).T
     cdf = np.array([np.histogram(a, bins=bins)[0]
                     for a in alpha]).cumsum(axis=1) / float(alpha.shape[1])
     cdf = cdf.T.reshape((len(bins) - 1,) + old_shape[1:])

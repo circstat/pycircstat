@@ -268,7 +268,6 @@ def test_kuiper_warning():
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         p, k = pycircstat.kuiper(alpha1, alpha2)
-        print(w)
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
         assert "N=10 not found in table" in str(w[-1].message)
@@ -342,3 +341,4 @@ def test_kuiper3():
                         i, :, j])
                 assert_equal(p[i, j], p2)
                 assert_equal(k[i, j], k2)
+
