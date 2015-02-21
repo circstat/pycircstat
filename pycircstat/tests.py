@@ -13,6 +13,7 @@ from . import descriptive, swap2zeroaxis
 from . import utils
 from .distributions import kappa
 import pandas as pd
+from pycircstat.data import load_kuiper_table
 
 
 @swap2zeroaxis(['alpha', 'w'], [0, 1])
@@ -336,7 +337,7 @@ def symtest(alpha, axis=None):
     return pval, T
 
 @nottest
-def watson_williams_test(*args, **kwargs):
+def watson_williams(*args, **kwargs):
     """
     Parametric Watson-Williams multi-sample test for equal means. Can be
     used as a one-way ANOVA test for circular data.
@@ -431,6 +432,102 @@ def watson_williams_test(*args, **kwargs):
                           'p-value': [pval, np.NaN, np.NaN]}).set_index('Source')
 
     return pval, T
+
+@swap2zeroaxis(['alpha1','alpha2'], [0, 1])
+def kuiper(alpha1, alpha2, res=100, axis=None):
+    """
+    The Kuiper two-sample test tests whether the two samples differ
+    significantly.The difference can be in any property, such as mean
+    location and dispersion. It is a circular analogue of the
+    Kolmogorov-Smirnov test.
+
+    H0: The two distributions are identical.
+    HA: The two distributions are different.
+
+    :param alpha1: fist sample (in radians)
+    :param alpha2: second sample (in radians)
+    :param res:    resolution at which the cdf is evaluated (default 100)
+    :returns: p-value and test statistic
+              p-value is the smallest of .10, .05, .02, .01, .005, .002,
+              .001, for which the test statistic is still higher
+              than the respective critical value. this is due to
+              the use of tabulated values. if p>.1, pval is set to 1.
+
+    References: [Batschelet1980]_ p. 112
+
+    """
+
+    if axis is not None:
+        assert alpha1.shape[1:] == alpha2.shape[1:], "Shapes of alphas not consistent with computation along axis."
+    n, m = alpha1.shape[axis], alpha2.shape[axis]
+
+    _, cdf1 = _sample_cdf(alpha1, res, axis=axis)
+    _, cdf2 = _sample_cdf(alpha2, res, axis=axis)
+
+    dplus = np.atleast_1d((cdf1-cdf2).max(axis=axis))
+    dplus[dplus < 0] = 0.
+    dminus = np.atleast_1d((cdf2-cdf1).max(axis=axis))
+    dminus[dminus < 0] = 0.
+
+    k = n * m * (dplus + dminus)
+    mi = np.min([m,n])
+    fac = np.sqrt(n*m*(n+m))
+    pval = np.asarray([_kuiper_lookup(mi,kk/fac) for kk in k.ravel()]).reshape(k.shape)
+    return pval, k
+
+
+def _kuiper_lookup(n,k):
+    ktable = load_kuiper_table()
+
+    alpha = np.asarray([.10, .05, .02, .01, .005, .002, .001])
+    nn = ktable[:,0]
+
+    isin = (nn == n)
+    if np.any(isin):
+        row = np.where(isin)[0]
+    else:
+        row = len(nn) - np.sum(n < nn)
+    if row == 0:
+        raise ValueError('N too small.')
+    else:
+        warnings.warn('N=%d not found in table, using closest N=%d present.' % (n , nn[row]))
+
+    idx = (ktable[row,1:]<k).squeeze()
+    if np.any(idx):
+        return alpha[idx].min()
+    else:
+        return 1.
+
+
+@swap2zeroaxis(['alpha'], [1])
+def _sample_cdf(alpha, resolution=100., axis=None):
+    """
+
+    Helper function for circ_kuipertest.
+    Evaluates CDF of sample in thetas.
+
+    :param alpha: sample (in radians)
+    :param resolution: resolution at which the cdf is evaluated (default 100)
+    :param axis: axis along which the cdf is computed
+    :returns: points at which cdf is evaluated, cdf values
+
+    """
+
+    if axis is None:
+        alpha = alpha.ravel()
+        axis = 0
+    bins = np.linspace(0,2*np.pi,resolution + 1)
+    old_shape = alpha.shape
+    alpha = alpha % (2*np.pi)
+
+    alpha = alpha.reshape((alpha.shape[0],np.prod(alpha.shape[1:]))).T
+    cdf = np.array([np.histogram(a, bins=bins)[0] for a in alpha]).cumsum(axis=1)/float(alpha.shape[1])
+    cdf = cdf.T.reshape((len(bins)-1,) + old_shape[1:])
+
+    return bins[:-1], cdf
+
+
+
 
 
 
