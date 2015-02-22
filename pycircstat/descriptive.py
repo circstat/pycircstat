@@ -162,8 +162,6 @@ def cdiff(alpha, beta):
     :param beta:   sample of circular random variable
     :return: distance between the pairs
     """
-    assert alpha.shape == beta.shape, 'Input dimensions do not match!'
-
     return np.angle(np.exp(1j * alpha) / np.exp(1j * beta))
 
 

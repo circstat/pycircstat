@@ -342,3 +342,45 @@ def test_kuiper3():
                 assert_equal(p[i, j], p2)
                 assert_equal(k[i, j], k2)
 
+
+def test_cmtest():
+    dat1 = np.asarray([0.024891365256, 1.154163238164, 4.733014717534, 5.826436742709, 1.824161057257,
+                       3.104228689593, 2.295866347225, 2.940906167843, 1.651790079113, 2.158209295126])
+    dat2 = np.asarray([1.794568099336, 0.773881541697, 3.937284518835, 6.227193753275, 5.824618281411,
+                       1.244981875150, 4.016281148318, 5.767162249130, 1.546435573244, 2.879568308187,
+                       4.359455634689, 3.048152268480, 5.747615761469, 2.118080736064, 1.604702366088])
+
+    p0 = 0.51329
+    P0 = 0.42735
+    p, P = pycircstat.cmtest(dat1, dat2)
+    assert_allclose(p, p0, atol=1e-4, rtol=1e-4)
+    assert_allclose(P, P0, atol=1e-4, rtol=1e-4)
+
+def test_cmtest2():
+    data1 = np.random.rand(3, 2, 15) * np.pi * 2.
+    data2 = np.random.rand(3, 2, 15) * np.pi * 2.
+    p, P = pycircstat.tests.cmtest(data1, data2, axis=2)
+    assert_true(p.shape == (3, 2))
+    assert_true(P.shape == (3, 2))
+    for i in range(data1.shape[0]):
+        for j in range(data1.shape[1]):
+            p2, P2 = pycircstat.tests.cmtest(
+                data1[i, j, :],
+                data2[i, j, :])
+            assert_equal(p[i, j], p2)
+            assert_equal(P[i, j], P2)
+
+def test_cmtest3():
+    data1 = np.random.rand(3, 15, 2) * np.pi * 2.
+    data2 = np.random.rand(3, 15, 2) * np.pi * 2.
+    p, P = pycircstat.tests.cmtest(data1, data2, axis=1)
+    assert_true(p.shape == (3, 2))
+    assert_true(P.shape == (3, 2))
+    for i in range(data1.shape[0]):
+        for j in range(data1.shape[2]):
+            p2, P2 = pycircstat.tests.cmtest(
+                data1[i, :, j],
+                data2[i, :, j])
+            assert_equal(p[i, j], p2)
+            assert_equal(P[i, j], P2)
+

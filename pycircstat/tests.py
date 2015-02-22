@@ -1,7 +1,7 @@
 """
 Statistical tests
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 import warnings
 from nose.tools import nottest
 
@@ -546,3 +546,42 @@ def _sample_cdf(alpha, resolution=100., axis=None):
     cdf = cdf.T.reshape((len(bins) - 1,) + old_shape[1:])
 
     return bins[:-1], cdf
+
+@nottest
+def cmtest(*args, **kwargs):
+    """
+    Non parametric multi-sample test for equal medians. Similar to a
+    Kruskal-Wallis test for linear data.
+
+    H0: the s populations have equal medians
+    HA: the s populations have unequal medians
+
+    :param alpha1: angles in radians
+    :param alpha2: angles in radians
+    :returns: p-value and test statistic of the common median test
+
+
+    References: [Fisher1995]_
+
+    """
+    axis = kwargs.get('axis', None)
+    if axis is None:
+        alpha = list(map(np.ravel, args))
+    else:
+        alpha = args
+
+    s = len(alpha)
+    n = [(0*a+1).sum(axis=axis) for a in alpha]
+    N = sum(n)
+
+    med = descriptive.median(np.concatenate(alpha, axis=axis), axis=axis)
+    if axis is not None:
+        med = np.expand_dims(med, axis=axis)
+
+    m = [np.sum(descriptive.cdiff(a, med)  < 0, axis=axis) for a in alpha]
+    if np.any([nn < 10 for nn in n]):
+        warnings.warn('Test not applicable. Sample size in at least one group to small.')
+    M = sum(m)
+    P = (N**2./(M*(N-M))) * sum([mm**2./nn for mm, nn in zip(m,n)]) - N*M/(N-M)
+    pval = stats.chi2.sf(P,df=s-1)
+    return pval, P
