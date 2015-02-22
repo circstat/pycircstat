@@ -585,3 +585,40 @@ def cmtest(*args, **kwargs):
     P = (N**2./(M*(N-M))) * sum([mm**2./nn for mm, nn in zip(m,n)]) - N*M/(N-M)
     pval = stats.chi2.sf(P,df=s-1)
     return pval, P
+
+@nottest
+def mtest(alpha, dir, xi=0.05, w=None, d=None, axis=None):
+    """
+    One-Sample test for the mean angle.
+
+    H0: the population has mean dir.
+    HA: the population has not mean dir.
+
+    Note: This is the equvivalent to a one-sample t-test with specified
+          mean direction.
+
+    :param alpha: sample of angles in radians
+    :param dir: assumed mean direction
+    :param w: number of incidences in case of binned angle data
+    :param d: spacing of bin centers for binned data, if supplied
+              correction factor is used to correct for bias in
+              estimation of r, in radians (!)
+    :param axis: test is computed along this axis
+    :returns: 0 if H0 can not be rejected, 1 otherwise, mean, confidence interval
+
+    References: [Zar2009]_
+    """
+
+    if w is None:
+        w = np.ones_like(alpha, dtype=float)
+    else:
+        assert alpha.shape == w.shape, "Shape of w and alpha must match"
+
+    dir = np.atleast_1d(dir)
+
+
+    mu, ci = descriptive.mean(alpha, w=w, d=d, axis=axis, ci=1.-xi)
+    t = descriptive.cdiff(mu, ci.lower)
+    h = np.abs(descriptive.cdiff(mu, dir)) > t
+
+    return h, mu, ci

@@ -384,3 +384,32 @@ def test_cmtest3():
             assert_equal(p[i, j], p2)
             assert_equal(P[i, j], P2)
 
+def test_mtest():
+    data = np.array([
+                    [0.58429, 0.88333],
+                    [1.14892, 2.22854],
+                    [2.87128, 3.06369],
+                    [1.07677, 1.49836],
+                    [2.96969, 1.51748],
+                    ])
+    h, mu, ci = pycircstat.tests.mtest(data, [np.pi/2., np.pi], xi=.2, axis=0)
+    out1 = np.array([0.76976, 0.50149])
+    assert_allclose(pycircstat.mean_ci_limits(data, ci=0.8, axis=0),
+                    out1, rtol=1e-4)
+    assert_true(np.all(h == [False, True]))
+
+    h, mu, ci = pycircstat.tests.mtest(data, np.pi/2., xi=.2, axis=1)
+    out2 = np.array([0.17081, 0.72910, 0.10911, 0.24385, 0.95426])
+    assert_allclose(pycircstat.mean_ci_limits(data, ci=0.8, axis=1),
+                    out2, rtol=1e-4)
+    assert_true(np.all(h == [True, False, True, True, False]))
+
+    out3 = np.array([1.0577, 2.4170])
+    h, mu, ci = pycircstat.tests.mtest(data, np.pi/2., xi=.05, axis=None)
+    assert_allclose(mu + pycircstat.mean_ci_limits(data, ci=0.95, axis=None),
+                    out3[1], rtol=1e-4)
+    assert_allclose(mu - pycircstat.mean_ci_limits(data, ci=0.95, axis=None),
+                    out3[0], rtol=1e-4)
+    assert_true(~h)
+    assert_allclose(mu, 1.737335083370)
+
