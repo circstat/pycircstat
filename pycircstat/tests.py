@@ -618,7 +618,41 @@ def mtest(alpha, dir, xi=0.05, w=None, d=None, axis=None):
 
 
     mu, ci = descriptive.mean(alpha, w=w, d=d, axis=axis, ci=1.-xi)
-    t = descriptive.cdiff(mu, ci.lower)
+    t = np.abs(descriptive.cdiff(mu, ci.lower))
     h = np.abs(descriptive.cdiff(mu, dir)) > t
 
     return h, mu, ci
+
+@nottest
+def medtest(alpha,md, axis=None):
+    """
+    Tests for difference in the median against a fixed value.
+
+    H0: the population has median angle md
+    HA: the population has not median angle md
+
+    :param alpha: sample of angles in radians
+    :param md:    median to test for
+    :param axis:  test is performed along this axis
+    :returns:     p-value
+    """
+
+    md = np.atleast_1d(md)
+
+
+    n = alpha.shape[axis] if axis is not None else len(alpha)
+
+    d = descriptive.cdiff(alpha,md)
+
+    n1 = np.sum(d<0, axis=axis)
+    n2 = np.sum(d>0, axis=axis)
+
+    # compute p-value with binomial test
+    n_min = np.array(n1)
+    n_min[n1 > n2] = n2[n1 > n2]
+
+    n_max = np.array(n1)
+    n_max[n1 < n2] = n2[n1 < n2]
+    # TODO: this formula can actually give more than 1, e.g. if n_max == n_min; possibly change that
+    return stats.binom.cdf(n_min, n, 0.5) + 1 - stats.binom.cdf(n_max-1, n, 0.5)
+

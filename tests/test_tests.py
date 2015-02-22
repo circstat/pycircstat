@@ -413,3 +413,40 @@ def test_mtest():
     assert_true(~h)
     assert_allclose(mu, 1.737335083370)
 
+
+def test_medtest():
+    x = np.asarray([3.315758071345, 3.142617638587, 2.997993073470, 3.100895432237, 2.943782900228,
+                    2.986354128533, 3.101125456006, 3.338854852289, 3.266087254291, 3.075897304454])
+    p = pycircstat.medtest(x, np.pi)
+    assert_allclose(p, 0.753906250000)
+
+
+def test_medtest2():
+    data1 = np.random.rand(3, 15, 2) * np.pi * 2.
+
+    p = pycircstat.tests.medtest(data1, np.pi, axis=1)
+    assert_true(p.shape == (3, 2))
+
+    for i in range(data1.shape[0]):
+        for j in range(data1.shape[2]):
+            p2 = pycircstat.tests.medtest(
+                data1[i, :, j],
+                np.pi)
+            assert_equal(p[i, j], p2)
+
+
+
+def test_medtest3():
+    data1 = np.random.rand(4, 3, 2, 15) * np.pi * 2.
+
+    p = pycircstat.tests.medtest(data1, np.pi, axis=3)
+    assert_true(p.shape == (4, 3, 2))
+
+    for k in range(data1.shape[0]):
+        for i in range(data1.shape[1]):
+            for j in range(data1.shape[2]):
+                p2 = pycircstat.tests.medtest(
+                    data1[k, i,  j, :],
+                    np.pi)
+                assert_equal(p[k, i, j], p2)
+
