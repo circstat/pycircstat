@@ -14,7 +14,7 @@ from . import utils
 from .distributions import kappa
 import pandas as pd
 from pycircstat.data import load_kuiper_table
-
+from scipy import special
 
 @swap2zeroaxis(['alpha', 'w'], [0, 1])
 def rayleigh(alpha, w=None, d=None, axis=None):
@@ -40,7 +40,7 @@ def rayleigh(alpha, w=None, d=None, axis=None):
     References: [Fisher1995]_, [Jammalamadaka2001]_, [Zar2009]_
     """
     # if axis is None:
-    #     axis = 0
+    # axis = 0
     #     alpha = alpha.ravel()
 
     if w is None:
@@ -116,11 +116,11 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     if np.any(idx50):
         A[idx50] = np.pi * np.sqrt(n[idx50]) / 2 / (n[idx50] - 2 * m[idx50])
         pval[idx50] = np.sqrt(2 * np.pi) / A[idx50] * \
-            np.exp(-np.pi ** 2 / 8 / A[idx50] ** 2)
+                      np.exp(-np.pi ** 2 / 8 / A[idx50] ** 2)
 
     if np.any(~idx50):
         pval[~idx50] = 2 ** (1 - n[~idx50]) * (n[~idx50] - \
-                             2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50]) 
+                                               2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50])
 
     return pval.squeeze(), m
 
@@ -474,8 +474,8 @@ def kuiper(alpha1, alpha2, res=100, axis=None):
 
     if axis is not None:
         assert alpha1.shape[
-            1:] == alpha2.shape[
-            1:], "Shapes of alphas not consistent with computation along axis."
+               1:] == alpha2.shape[
+                      1:], "Shapes of alphas not consistent with computation along axis."
     n, m = alpha1.shape[axis], alpha2.shape[axis]
 
     _, cdf1 = _sample_cdf(alpha1, res, axis=axis)
@@ -547,6 +547,7 @@ def _sample_cdf(alpha, resolution=100., axis=None):
 
     return bins[:-1], cdf
 
+
 @nottest
 def cmtest(*args, **kwargs):
     """
@@ -571,20 +572,21 @@ def cmtest(*args, **kwargs):
         alpha = args
 
     s = len(alpha)
-    n = [(0*a+1).sum(axis=axis) for a in alpha]
+    n = [(0 * a + 1).sum(axis=axis) for a in alpha]
     N = sum(n)
 
     med = descriptive.median(np.concatenate(alpha, axis=axis), axis=axis)
     if axis is not None:
         med = np.expand_dims(med, axis=axis)
 
-    m = [np.sum(descriptive.cdiff(a, med)  < 0, axis=axis) for a in alpha]
+    m = [np.sum(descriptive.cdiff(a, med) < 0, axis=axis) for a in alpha]
     if np.any([nn < 10 for nn in n]):
         warnings.warn('Test not applicable. Sample size in at least one group to small.')
     M = sum(m)
-    P = (N**2./(M*(N-M))) * sum([mm**2./nn for mm, nn in zip(m,n)]) - N*M/(N-M)
-    pval = stats.chi2.sf(P,df=s-1)
+    P = (N ** 2. / (M * (N - M))) * sum([mm ** 2. / nn for mm, nn in zip(m, n)]) - N * M / (N - M)
+    pval = stats.chi2.sf(P, df=s - 1)
     return pval, P
+
 
 @nottest
 def mtest(alpha, dir, xi=0.05, w=None, d=None, axis=None):
@@ -616,15 +618,15 @@ def mtest(alpha, dir, xi=0.05, w=None, d=None, axis=None):
 
     dir = np.atleast_1d(dir)
 
-
-    mu, ci = descriptive.mean(alpha, w=w, d=d, axis=axis, ci=1.-xi)
+    mu, ci = descriptive.mean(alpha, w=w, d=d, axis=axis, ci=1. - xi)
     t = np.abs(descriptive.cdiff(mu, ci.lower))
     h = np.abs(descriptive.cdiff(mu, dir)) > t
 
     return h, mu, ci
 
+
 @nottest
-def medtest(alpha,md, axis=None):
+def medtest(alpha, md, axis=None):
     """
     Tests for difference in the median against a fixed value.
 
@@ -639,13 +641,12 @@ def medtest(alpha,md, axis=None):
 
     md = np.atleast_1d(md)
 
-
     n = alpha.shape[axis] if axis is not None else len(alpha)
 
-    d = descriptive.cdiff(alpha,md)
+    d = descriptive.cdiff(alpha, md)
 
-    n1 = np.sum(d<0, axis=axis)
-    n2 = np.sum(d>0, axis=axis)
+    n1 = np.atleast_1d(np.sum(d < 0, axis=axis))
+    n2 = np.atleast_1d(np.sum(d > 0, axis=axis))
 
     # compute p-value with binomial test
     n_min = np.array(n1)
@@ -654,5 +655,132 @@ def medtest(alpha,md, axis=None):
     n_max = np.array(n1)
     n_max[n1 < n2] = n2[n1 < n2]
     # TODO: this formula can actually give more than 1, e.g. if n_max == n_min; possibly change that
-    return stats.binom.cdf(n_min, n, 0.5) + 1 - stats.binom.cdf(n_max-1, n, 0.5)
+    return stats.binom.cdf(n_min, n, 0.5) + 1 - stats.binom.cdf(n_max - 1, n, 0.5)
 
+
+@nottest
+def hktest(alpha, idp, idq, inter=True, fn=None):
+    if fn is None:
+        fn = ['A', 'B']
+    p = len(np.unique(idp))
+    q = len(np.unique(idq))
+    df = pd.DataFrame({fn[0]: idp, fn[1]: idq, 'dependent': alpha})
+    n = len(df)
+    tr = n * descriptive.resultant_vector_length(df['dependent'])
+    kk = kappa(tr / n)
+
+    # both factors
+    gr = df.groupby(fn)
+    cn = gr.count()
+    cr = gr.agg(descriptive.resultant_vector_length) * cn
+    cn = cn.unstack(fn[1])
+    cr = cr.unstack(fn[1])
+
+    # factor A
+    gr = df.groupby(fn[0])
+    pn = gr.count()['dependent']
+    pr = gr.agg(descriptive.resultant_vector_length)['dependent'] * pn
+    pm = gr.agg(descriptive.mean)['dependent']
+    # factor B
+    gr = df.groupby(fn[1])
+    qn = gr.count()['dependent']
+    qr = gr.agg(descriptive.resultant_vector_length)['dependent'] * qn
+    qm = gr.agg(descriptive.mean)['dependent']
+
+    if kk > 2:  # large kappa
+        # effect of factor 1
+        eff_1 = sum(pr ** 2 / cn.sum(axis=1)) - tr ** 2 / n
+        df_1 = p - 1
+        ms_1 = eff_1 / df_1
+
+        # effect of factor 2
+        eff_2 = sum(qr ** 2. / cn.sum(axis=0)) - tr ** 2 / n
+        df_2 = q - 1
+        ms_2 = eff_2 / df_2
+
+        # total effect
+        eff_t = n - tr ** 2 / n
+        df_t = n - 1
+        m = cn.values.mean()
+
+        if inter:
+            # correction factor for improved F statistic
+            beta = 1 / (1 - 1 / (5 * kk) - 1 / (10 * (kk ** 2)))
+            # residual effects
+            eff_r = n - (cr**2./cn).values.sum()
+            df_r = p*q*(m-1)
+            ms_r = eff_r / df_r
+
+            # interaction effects
+            eff_i = (cr**2./cn).values.sum() - sum(qr**2./qn) - sum(pr**2./pn) + tr**2/n
+            df_i = (p-1)*(q-1)
+            ms_i = eff_i/df_i;
+
+            # interaction test statistic
+            FI = ms_i / ms_r
+            pI = 1 - stats.f.cdf(FI,df_i,df_r)
+        else:
+            # residual effect
+            eff_r = n - sum(qr**2./qn)- sum(pr**2./pn) + tr**2/n
+            df_r = (p-1)*(q-1)
+            ms_r = eff_r / df_r
+
+            # interaction effects
+            eff_i = None
+            df_i = None
+            ms_i = None
+
+            # interaction test statistic
+            FI = None
+            pI = np.NaN
+            beta = 1
+
+
+        F1 = beta * ms_1 / ms_r
+        p1 = 1 - stats.f.cdf(F1,df_1,df_r)
+
+        F2 = beta * ms_2 / ms_r
+        p2 = 1 - stats.f.cdf(F2,df_2,df_r)
+
+    else: #small kappa
+        # correction factor
+        # special.iv is Modified Bessel function of the first kind of real order
+        rr = special.iv(1,kk) / special.iv(0,kk)
+        f = 2/(1-rr**2)
+
+        chi1 = f * (sum(pr**2./pn)- tr**2/n)
+        df_1 = 2*(p-1)
+        p1 = 1 - stats.chi2.cdf(chi1, df=df_1)
+
+        chi2 = f * (sum(qr**2./qn)- tr**2/n)
+        df_2 = 2*(q-1)
+        p2 = 1 - stats.chi2.cdf(chi2, df=df_2)
+
+        chiI = f * ( (cr**2./cn).values.sum() - sum(pr**2./pn) - sum(qr**2./qn) + tr**2/n)
+        df_i = (p-1) * (q-1)
+        pI = stats.chi2.sf(chiI, df=df_i)
+
+
+
+    pval = (p1.squeeze(), p2.squeeze(), pI.squeeze())
+
+    if kk>2:
+        table = pd.DataFrame({
+            'Source': fn + ['Interaction', 'Residual', 'Total'],
+            'DoF': [df_1, df_2, df_i, df_r, df_t],
+            'SS': [eff_1, eff_2, eff_i, eff_r, eff_t],
+            'MS': [ms_1, ms_2, ms_i, ms_r, np.NaN],
+            'F': [F1.squeeze(), F2.squeeze(), FI, np.NaN, np.NaN],
+            'p': list(pval) + [np.NaN, np.NaN]
+        })
+        table = table.set_index('Source')
+    else:
+        table = pd.DataFrame({
+            'Source': fn + ['Interaction'],
+            'DoF': [df_1, df_2, df_i],
+            'chi2': [chi1.squeeze(), chi2.squeeze(), chiI.squeeze()],
+            'p': pval
+        })
+        table = table.set_index('Source')
+
+    return pval, table
