@@ -7,6 +7,7 @@ import sys
 from .decorators import swap2zeroaxis
 from .descriptive import resultant_vector_length
 
+
 @swap2zeroaxis(['alpha'], [0])
 def kappa(alpha, w=None, axis=None):
     """
@@ -29,35 +30,37 @@ def kappa(alpha, w=None, axis=None):
 
     n = alpha.shape[axis]
 
-    if n>1:
-        R = resultant_vector_length(alpha,w, axis=axis)
+    if n > 1:
+        R = resultant_vector_length(alpha, w, axis=axis)
     else:
         R = alpha
     R = np.atleast_1d(R)
 
-    kappa = np.asarray(0*R)
+    kappa = np.asarray(0 * R)
 
     idx = R < 0.53
 
-    kappa[idx] = 2.*R[idx] + R[idx]**3. + 5*R[idx]**5./6
+    kappa[idx] = 2. * R[idx] + R[idx]**3. + 5 * R[idx]**5. / 6
 
     idx = (R >= 0.53) & (R < 0.85)
-    kappa[idx] = -.4 + 1.39*R[idx] + 0.43/(1.-R[idx])
+    kappa[idx] = -.4 + 1.39 * R[idx] + 0.43 / (1. - R[idx])
 
     idx = R > 0.85
-    kappa[idx] = 1./(R[idx]**3. - 4.*R[idx]**2. + 3.*R[idx])
+    kappa[idx] = 1. / (R[idx]**3. - 4. * R[idx]**2. + 3. * R[idx])
 
     if n < 15 and n > 1:
         idx = kappa < 2.
-        kappa[idx] = kappa[idx]-2*(n*kappa[idx])**-1.
+        kappa[idx] = kappa[idx] - 2 * (n * kappa[idx])**-1.
         idx0 = kappa < 0
         kappa[idx & idx0] = 0
 
-        kappa[~idx] = (n-1)**3 * kappa[~idx]/(n**3.+n)
+        kappa[~idx] = (n - 1)**3 * kappa[~idx] / (n**3. + n)
 
     return kappa
 
+
 class cardioid_gen(rv_continuous):
+
     """
 
     Cardioid distribution of a single random variable.
@@ -110,13 +113,16 @@ class cardioid_gen(rv_continuous):
         # x = (x - mu - np.pi) % (2*np.pi)
         # return (-mu + 2*rho*np.sin(x-mu) + x + np.pi)/2/np.pi
         x = x % (2 * np.pi)
-        return (2 * rho * np.sin(x - mu) + x + 2 * rho * np.sin(mu)) / 2 / np.pi
+        return (2 * rho * np.sin(x - mu) + x + 2 * rho * np.sin(mu)) / \
+            2 / np.pi
 
-if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
-    cardioid = cardioid_gen(name='cardioid',  shapes="mu, rho")
+# hack for problems with numpy missing in readthedocs and mock
+if not 'sphinx' in sys.modules:
+    cardioid = cardioid_gen(name='cardioid', shapes="mu, rho")
 
 
 class triangular_gen(rv_continuous):
+
     """
 
     triangular distribution of a single random variable.
@@ -177,7 +183,8 @@ class triangular_gen(rv_continuous):
             (0.375 * np.pi ** 2 * rho[~idx] - 0.5) / np.pi
         return ret
 
-if not 'sphinx' in sys.modules: # hack for problems with numpy missing in readthedocs and mock
+# hack for problems with numpy missing in readthedocs and mock
+if not 'sphinx' in sys.modules:
     triangular = triangular_gen(name='triangular', shapes="rho")
 
 # wrapper for von Mises

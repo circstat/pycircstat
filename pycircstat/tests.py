@@ -1,7 +1,7 @@
 """
 Statistical tests
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, division
 import warnings
 from nose.tools import nottest
 
@@ -13,6 +13,7 @@ from . import descriptive, swap2zeroaxis
 from . import utils
 from .distributions import kappa
 import pandas as pd
+from pycircstat.data import load_kuiper_table
 
 
 @swap2zeroaxis(['alpha', 'w'], [0, 1])
@@ -100,7 +101,8 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
     m2 = np.zeros((len(dg),) + alpha.shape[1:])
 
     for i, dg_val in enumerate(dg):
-        m1[i, ...] = np.sum(w * ((alpha > dg_val) & (alpha < np.pi + dg_val)), axis=axis)
+        m1[i, ...] = np.sum(
+            w * ((alpha > dg_val) & (alpha < np.pi + dg_val)), axis=axis)
         m2[i, ...] = n - m1[i, ...]
 
     m = np.concatenate((m1, m2), axis=0).min(axis=axis)
@@ -113,10 +115,12 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
 
     if np.any(idx50):
         A[idx50] = np.pi * np.sqrt(n[idx50]) / 2 / (n[idx50] - 2 * m[idx50])
-        pval[idx50] = np.sqrt(2 * np.pi) / A[idx50] * np.exp(-np.pi ** 2 / 8 / A[idx50] ** 2)
+        pval[idx50] = np.sqrt(2 * np.pi) / A[idx50] * \
+            np.exp(-np.pi ** 2 / 8 / A[idx50] ** 2)
 
     if np.any(~idx50):
-        pval[~idx50] = 2 ** (1 - n[~idx50]) * (n[~idx50] - 2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50])
+        pval[~idx50] = 2 ** (1 - n[~idx50]) * (n[~idx50] - \
+                             2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50]) 
 
     return pval.squeeze(), m
 
@@ -252,20 +256,20 @@ def _critical_value_raospacing(n, U):
 @swap2zeroaxis(['alpha', 'w'], [0, 1])
 def vtest(alpha, mu, w=None, d=None, axis=None):
     """
-    Computes V test for nonuniformity of circular data with a known mean 
+    Computes V test for nonuniformity of circular data with a known mean
     direction of dir.
 
     H0: the population is uniformly distributed around the circle
     HA: the populatoin is not distributed uniformly around the circle but
         has a mean of mu
-        
+
     Note: Not rejecting H0 may mean that the population is uniformly
     distributed around the circle OR that it has a mode but that this mode
     is not centered at dir.
 
     The V test has more power than the Rayleigh test and is preferred if
     there is reason to believe (before seeing the data!) in a specific
-    mean direction. 
+    mean direction.
 
 
     :param alpha: sample of angles in radian
@@ -305,19 +309,19 @@ def vtest(alpha, mu, w=None, d=None, axis=None):
 @swap2zeroaxis(['alpha'], [0, 1])
 def symtest(alpha, axis=None):
     """
-    Non-parametric test for symmetry around the median. Works by performing a 
+    Non-parametric test for symmetry around the median. Works by performing a
     Wilcoxon sign rank test on the differences to the median.
 
     H0: the population is symmetrical around the median
     HA: the population is not symmetrical around the median
-        
+
 
     :param alpha: sample of angles in radian
     :param axis:  compute along this dimension, default is None
                   if axis=None, array is raveled
     :return pval: two-tailed p-value
     :return T:    test statistics of underlying wilcoxon test
-   
+
 
     References: [Zar2009]_
     """
@@ -329,14 +333,16 @@ def symtest(alpha, axis=None):
     if axis is not None:
         oshape = d.shape[1:]
         d2 = d.reshape((d.shape[0], np.prod(d.shape[1:])))
-        T, pval = map(lambda x: np.asarray(x).reshape(oshape), zip(*[stats.wilcoxon(dd) for dd in d2.T]))
+        T, pval = map(lambda x: np.asarray(x).reshape(
+            oshape), zip(*[stats.wilcoxon(dd) for dd in d2.T]))
     else:
         T, pval = stats.wilcoxon(d)
 
     return pval, T
 
+
 @nottest
-def watson_williams_test(*args, **kwargs):
+def watson_williams(*args, **kwargs):
     """
     Parametric Watson-Williams multi-sample test for equal means. Can be
     used as a one-way ANOVA test for circular data.
@@ -368,9 +374,11 @@ def watson_williams_test(*args, **kwargs):
 
     # argument checking
     if w is not None:
-        assert len(w) == len(args), "w must have the same length as number of arrays"
+        assert len(w) == len(
+            args), "w must have the same length as number of arrays"
         for i, (ww, alpha) in enumerate(zip(w, args)):
-            assert ww.shape == alpha.shape, "w[%i] and argument %i must have same shape" % (i, i)
+            assert ww.shape == alpha.shape, "w[%i] and argument %i must have same shape" % (
+                i, i)
     else:
         w = [np.ones_like(a) for a in args]
 
@@ -382,12 +390,17 @@ def watson_williams_test(*args, **kwargs):
 
     k = len(args)
 
-    #np.asarray(list())
+    # np.asarray(list())
     ni = list(map(lambda x: np.sum(x, axis=axis), w))
-    ri = np.asarray([descriptive.resultant_vector_length(a, ww, axis=axis) for a, ww in zip(alpha, w)])
+    ri = np.asarray([descriptive.resultant_vector_length(
+        a, ww, axis=axis) for a, ww in zip(alpha, w)])
 
-    r = descriptive.resultant_vector_length(np.concatenate(alpha, axis=axis), np.concatenate(w, axis=axis), axis=axis)
-    n = sum(ni)  # this must not be the numpy sum since the arrays are to be summed
+    r = descriptive.resultant_vector_length(
+        np.concatenate(
+            alpha, axis=axis), np.concatenate(
+            w, axis=axis), axis=axis)
+    # this must not be the numpy sum since the arrays are to be summed
+    n = sum(ni)
 
     rw = sum([rii * nii / n for rii, nii in zip(ri, ni)])
     kk = kappa(rw[None, ...], axis=0)
@@ -396,21 +409,23 @@ def watson_williams_test(*args, **kwargs):
     A = sum([rii * nii for rii, nii in zip(ri, ni)]) - r * n
     B = n - sum([rii * nii for rii, nii in zip(ri, ni)])
 
-    F = ( beta * (n - k) * A / (k - 1) / B).squeeze()
+    F = (beta * (n - k) * A / (k - 1) / B).squeeze()
     pval = stats.f.sf(F, k - 1, n - k).squeeze()
 
     if np.any((n >= 11) & (rw < .45)):
-        warnings.warn('Test not applicable. Average resultant vector length < 0.45.')
-    elif np.any((n < 11 ) & ( n >= 7 ) & ( rw < .5)):
+        warnings.warn(
+            'Test not applicable. Average resultant vector length < 0.45.')
+    elif np.any((n < 11) & (n >= 7) & (rw < .5)):
         warnings.warn(
             'Test not applicable. Average number of samples per population 6 < x < 11 '
             'and average resultant vector length < 0.5.')
-    elif np.any((n >= 5 ) & ( n < 7 ) & ( rw < .55)):
+    elif np.any((n >= 5) & (n < 7) & (rw < .55)):
         warnings.warn(
             'Test not applicable. Average number of samples per population 4 < x < 7 and '
             'average resultant vector length < 0.55.')
     elif np.any(n < 5):
-        warnings.warn('Test not applicable. Average number of samples per population < 5.')
+        warnings.warn(
+            'Test not applicable. Average number of samples per population < 5.')
 
     if np.prod(pval.shape) > 1:
         T = np.zeros_like(pval, dtype=object)
@@ -433,11 +448,211 @@ def watson_williams_test(*args, **kwargs):
     return pval, T
 
 
+@swap2zeroaxis(['alpha1', 'alpha2'], [0, 1])
+def kuiper(alpha1, alpha2, res=100, axis=None):
+    """
+    The Kuiper two-sample test tests whether the two samples differ
+    significantly.The difference can be in any property, such as mean
+    location and dispersion. It is a circular analogue of the
+    Kolmogorov-Smirnov test.
+
+    H0: The two distributions are identical.
+    HA: The two distributions are different.
+
+    :param alpha1: fist sample (in radians)
+    :param alpha2: second sample (in radians)
+    :param res:    resolution at which the cdf is evaluated (default 100)
+    :returns: p-value and test statistic
+              p-value is the smallest of .10, .05, .02, .01, .005, .002,
+              .001, for which the test statistic is still higher
+              than the respective critical value. this is due to
+              the use of tabulated values. if p>.1, pval is set to 1.
+
+    References: [Batschelet1980]_ p. 112
+
+    """
+
+    if axis is not None:
+        assert alpha1.shape[
+            1:] == alpha2.shape[
+            1:], "Shapes of alphas not consistent with computation along axis."
+    n, m = alpha1.shape[axis], alpha2.shape[axis]
+
+    _, cdf1 = _sample_cdf(alpha1, res, axis=axis)
+    _, cdf2 = _sample_cdf(alpha2, res, axis=axis)
+
+    dplus = np.atleast_1d((cdf1 - cdf2).max(axis=axis))
+    dplus[dplus < 0] = 0.
+    dminus = np.atleast_1d((cdf2 - cdf1).max(axis=axis))
+    dminus[dminus < 0] = 0.
+
+    k = n * m * (dplus + dminus)
+    mi = np.min([m, n])
+    fac = np.sqrt(n * m * (n + m))
+    pval = np.asarray([_kuiper_lookup(mi, kk / fac)
+                       for kk in k.ravel()]).reshape(k.shape)
+    return pval, k
 
 
+def _kuiper_lookup(n, k):
+    ktable = load_kuiper_table()
+
+    alpha = np.asarray([.10, .05, .02, .01, .005, .002, .001])
+    nn = ktable[:, 0]
+
+    isin = (nn == n)
+    if np.any(isin):
+        row = np.where(isin)[0]
+    else:
+        row = len(nn) - np.sum(n < nn)
+    if row == 0:
+        raise ValueError('N too small.')
+    else:
+        warnings.warn(
+            'N=%d not found in table, using closest N=%d present.' %
+            (n, nn[row]))
+
+    idx = (ktable[row, 1:] < k).squeeze()
+    if np.any(idx):
+        return alpha[idx].min()
+    else:
+        return 1.
 
 
+@swap2zeroaxis(['alpha'], [1])
+def _sample_cdf(alpha, resolution=100., axis=None):
+    """
+
+    Helper function for circ_kuipertest.
+    Evaluates CDF of sample in thetas.
+
+    :param alpha: sample (in radians)
+    :param resolution: resolution at which the cdf is evaluated (default 100)
+    :param axis: axis along which the cdf is computed
+    :returns: points at which cdf is evaluated, cdf values
+
+    """
+
+    if axis is None:
+        alpha = alpha.ravel()
+        axis = 0
+    bins = np.linspace(0, 2 * np.pi, resolution + 1)
+    old_shape = alpha.shape
+    alpha = alpha % (2 * np.pi)
+
+    alpha = alpha.reshape((alpha.shape[0], int(np.prod(alpha.shape[1:])))).T
+    cdf = np.array([np.histogram(a, bins=bins)[0]
+                    for a in alpha]).cumsum(axis=1) / float(alpha.shape[1])
+    cdf = cdf.T.reshape((len(bins) - 1,) + old_shape[1:])
+
+    return bins[:-1], cdf
+
+@nottest
+def cmtest(*args, **kwargs):
+    """
+    Non parametric multi-sample test for equal medians. Similar to a
+    Kruskal-Wallis test for linear data.
+
+    H0: the s populations have equal medians
+    HA: the s populations have unequal medians
+
+    :param alpha1: angles in radians
+    :param alpha2: angles in radians
+    :returns: p-value and test statistic of the common median test
 
 
+    References: [Fisher1995]_
 
+    """
+    axis = kwargs.get('axis', None)
+    if axis is None:
+        alpha = list(map(np.ravel, args))
+    else:
+        alpha = args
+
+    s = len(alpha)
+    n = [(0*a+1).sum(axis=axis) for a in alpha]
+    N = sum(n)
+
+    med = descriptive.median(np.concatenate(alpha, axis=axis), axis=axis)
+    if axis is not None:
+        med = np.expand_dims(med, axis=axis)
+
+    m = [np.sum(descriptive.cdiff(a, med)  < 0, axis=axis) for a in alpha]
+    if np.any([nn < 10 for nn in n]):
+        warnings.warn('Test not applicable. Sample size in at least one group to small.')
+    M = sum(m)
+    P = (N**2./(M*(N-M))) * sum([mm**2./nn for mm, nn in zip(m,n)]) - N*M/(N-M)
+    pval = stats.chi2.sf(P,df=s-1)
+    return pval, P
+
+@nottest
+def mtest(alpha, dir, xi=0.05, w=None, d=None, axis=None):
+    """
+    One-Sample test for the mean angle.
+
+    H0: the population has mean dir.
+    HA: the population has not mean dir.
+
+    Note: This is the equvivalent to a one-sample t-test with specified
+          mean direction.
+
+    :param alpha: sample of angles in radians
+    :param dir: assumed mean direction
+    :param w: number of incidences in case of binned angle data
+    :param d: spacing of bin centers for binned data, if supplied
+              correction factor is used to correct for bias in
+              estimation of r, in radians (!)
+    :param axis: test is computed along this axis
+    :returns: 0 if H0 can not be rejected, 1 otherwise, mean, confidence interval
+
+    References: [Zar2009]_
+    """
+
+    if w is None:
+        w = np.ones_like(alpha, dtype=float)
+    else:
+        assert alpha.shape == w.shape, "Shape of w and alpha must match"
+
+    dir = np.atleast_1d(dir)
+
+
+    mu, ci = descriptive.mean(alpha, w=w, d=d, axis=axis, ci=1.-xi)
+    t = np.abs(descriptive.cdiff(mu, ci.lower))
+    h = np.abs(descriptive.cdiff(mu, dir)) > t
+
+    return h, mu, ci
+
+@nottest
+def medtest(alpha,md, axis=None):
+    """
+    Tests for difference in the median against a fixed value.
+
+    H0: the population has median angle md
+    HA: the population has not median angle md
+
+    :param alpha: sample of angles in radians
+    :param md:    median to test for
+    :param axis:  test is performed along this axis
+    :returns:     p-value
+    """
+
+    md = np.atleast_1d(md)
+
+
+    n = alpha.shape[axis] if axis is not None else len(alpha)
+
+    d = descriptive.cdiff(alpha,md)
+
+    n1 = np.sum(d<0, axis=axis)
+    n2 = np.sum(d>0, axis=axis)
+
+    # compute p-value with binomial test
+    n_min = np.array(n1)
+    n_min[n1 > n2] = n2[n1 > n2]
+
+    n_max = np.array(n1)
+    n_max[n1 < n2] = n2[n1 < n2]
+    # TODO: this formula can actually give more than 1, e.g. if n_max == n_min; possibly change that
+    return stats.binom.cdf(n_min, n, 0.5) + 1 - stats.binom.cdf(n_max-1, n, 0.5)
 

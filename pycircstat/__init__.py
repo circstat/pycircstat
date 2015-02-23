@@ -7,3 +7,4 @@ from .descriptive import *
 from .tests import *
 from .utils import *
 from . import distributions
+from . import data

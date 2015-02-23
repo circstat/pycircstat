@@ -16,6 +16,7 @@ from .decorators import mod2pi, swap2zeroaxis
 
 
 class bootstrap:
+
     """
     Decorator to implement bootstrapping. It looks for the arguments ci, axis,
     and bootstrap_iter to determine the proper parameters for bootstrapping.
@@ -161,8 +162,6 @@ def cdiff(alpha, beta):
     :param beta:   sample of circular random variable
     :return: distance between the pairs
     """
-    assert alpha.shape == beta.shape, 'Input dimensions do not match!'
-
     return np.angle(np.exp(1j * alpha) / np.exp(1j * beta))
 
 
@@ -179,7 +178,6 @@ def pairwise_cdiff(alpha, beta=None):
     """
     if beta is None:
         beta = alpha
-
 
     # advanced slicing and broadcasting to make pairwise distance work
     # between arbitrary nd arrays
@@ -325,7 +323,9 @@ def resultant_vector_length(alpha, w=None, d=None, axis=None,
         r *= d / 2 / np.sin(d / 2)
     return r
 
-vector_strength = resultant_vector_length # defines synonym for resultant_vector_length
+# defines synonym for resultant_vector_length
+vector_strength = resultant_vector_length
+
 
 def _complex_mean(alpha, w=None, axis=None, axial_correction=1):
     if w is None:
@@ -364,7 +364,7 @@ def center(*args, **kwargs):
         return args[0] - mean(args[0], axis=axis)
     else:
         return tuple([a - mean(a, axis=axis)[reshaper]
-                      for a in args if type(a) == np.ndarray])
+                      for a in args if isinstance(a, np.ndarray)])
 
 
 @mod2pi
@@ -438,7 +438,6 @@ def var(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
         if w is not None:
             w = w.ravel()
 
-
     if w is None:
         w = np.ones_like(alpha)
 
@@ -511,7 +510,6 @@ def avar(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
         if w is not None:
             w = w.ravel()
 
-
     if w is None:
         w = np.ones_like(alpha)
 
@@ -544,8 +542,6 @@ def astd(alpha, w=None, d=None, axis=None, ci=None, bootstrap_iter=None):
         if w is not None:
             w = w.ravel()
 
-
-
     if w is None:
         w = np.ones_like(alpha)
 
@@ -566,7 +562,10 @@ def axial(alpha, p=1):
 
 
 def _corr(x, y, axis=None):
-    return np.mean(x * y, axis=axis) / np.std(x, axis=axis) / np.std(y, axis=axis)
+    return np.mean(x * y,
+                   axis=axis) / np.std(x,
+                                       axis=axis) / np.std(y,
+                                                           axis=axis)
 
 
 @bootstrap(1, 'linear')
@@ -598,7 +597,8 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
     rcs = _corr(np.sin(alpha), np.cos(alpha))
 
     # compute angular-linear correlation (equ. 27.47)
-    return np.sqrt((rxc ** 2 + rxs ** 2 - 2 * rxc * rxs * rcs) / (1 - rcs ** 2))
+    return np.sqrt(
+        (rxc ** 2 + rxs ** 2 - 2 * rxc * rxs * rcs) / (1 - rcs ** 2))
 
 
 @bootstrap(2, 'linear')
@@ -685,7 +685,7 @@ def moment(alpha, p=1, cent=False,
 
     if cent:
         theta = mean(alpha, w=w, d=d, axis=axis)
-        theta2 = np.tile(theta, (alpha.shape[0],) + len(theta.shape)*(1,))
+        theta2 = np.tile(theta, (alpha.shape[0],) + len(theta.shape) * (1,))
         alpha = cdiff(alpha, theta2)
 
     n = alpha.shape[axis]
@@ -695,9 +695,16 @@ def moment(alpha, p=1, cent=False,
 
     return mp
 
+
 @bootstrap(1, 'linear')
 @swap2zeroaxis(['alpha'], [0])
-def kurtosis(alpha, w=None, axis=None, mode='pewsey', ci=None, bootstrap_iter=None):
+def kurtosis(
+        alpha,
+        w=None,
+        axis=None,
+        mode='pewsey',
+        ci=None,
+        bootstrap_iter=None):
     """
     Calculates a measure of angular kurtosis.
 
@@ -719,21 +726,29 @@ def kurtosis(alpha, w=None, axis=None, mode='pewsey', ci=None, bootstrap_iter=No
 
     theta = mean(alpha, w=w, axis=axis)
 
-
     if mode == 'pewsey':
-        theta2 = np.tile(theta, (alpha.shape[0],)+ len(theta.shape) * (1,))
-        return np.sum(w * (np.cos(2 * (cdiff(alpha,theta2) ) ) ), axis=0) / np.sum(w, axis=0)
-    elif mode =='fisher':
-        mom = moment(alpha,p=2,w=w,axis=axis, cent=False)
+        theta2 = np.tile(theta, (alpha.shape[0],) + len(theta.shape) * (1,))
+        return np.sum(
+            w * (np.cos(2 * (cdiff(alpha, theta2)))), axis=0) / np.sum(w, axis=0)
+    elif mode == 'fisher':
+        mom = moment(alpha, p=2, w=w, axis=axis, cent=False)
         mu2, rho2 = np.angle(mom), np.abs(mom)
         R = resultant_vector_length(alpha, w=w, axis=axis)
-        return (rho2 * np.cos( cdiff(mu2, 2 * theta))-R**4)/(1-R)**2 # (formula 2.30)
+        return (rho2 * np.cos(cdiff(mu2, 2 * theta)) - R**4) / \
+            (1 - R)**2  # (formula 2.30)
     else:
         raise ValueError("Mode %s not known!" % (mode, ))
 
+
 @bootstrap(1, 'linear')
 @swap2zeroaxis(['alpha'], [0])
-def skewness(alpha, w=None, axis=None, ci=None, bootstrap_iter=None, mode='pewsey'):
+def skewness(
+        alpha,
+        w=None,
+        axis=None,
+        ci=None,
+        bootstrap_iter=None,
+        mode='pewsey'):
     """
     Calculates a measure of angular skewness.
 
@@ -758,14 +773,14 @@ def skewness(alpha, w=None, axis=None, ci=None, bootstrap_iter=None, mode='pewse
 
     # compute skewness
     if mode == 'pewsey':
-        theta2 = np.tile(theta, (alpha.shape[0],)+ len(theta.shape) * (1,))
-        return np.sum(w * np.sin(2*cdiff(alpha, theta2)), axis=axis)/np.sum(w, axis=axis)
-    elif mode =='fisher':
-        mom = moment(alpha,p=2,w=w,axis=axis, cent=True)
+        theta2 = np.tile(theta, (alpha.shape[0],) + len(theta.shape) * (1,))
+        return np.sum(
+            w * np.sin(2 * cdiff(alpha, theta2)), axis=axis) / np.sum(w, axis=axis)
+    elif mode == 'fisher':
+        mom = moment(alpha, p=2, w=w, axis=axis, cent=True)
         mu2, rho2 = np.angle(mom), np.abs(mom)
-        R = resultant_vector_length(alpha,w=w,axis=axis)
-        return rho2*np.sin(cdiff(mu2, 2*theta))/(1-R)**(3./2) #(formula 2.29)
+        R = resultant_vector_length(alpha, w=w, axis=axis)
+        return rho2 * np.sin(cdiff(mu2, 2 * theta)) / \
+            (1 - R)**(3. / 2)  # (formula 2.29)
     else:
         raise ValueError("Mode %s not known!" % (mode, ))
-
-

@@ -23,15 +23,15 @@ axis_2arg_test_funcs = [pycircstat.corrcc,
 
 
 test_data_2d = np.array([
-                    [0.58429, 0.88333],
-                    [1.14892, 2.22854],
-                    [2.87128, 3.06369],
-                    [1.07677, 1.49836],
-                    [2.96969, 1.51748],
-                    ])
+    [0.58429, 0.88333],
+    [1.14892, 2.22854],
+    [2.87128, 3.06369],
+    [1.07677, 1.49836],
+    [2.96969, 1.51748],
+])
 
 test_data_1d = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
-                       1.54256458, 5.19290675, 2.18474784,
+                         1.54256458, 5.19290675, 2.18474784,
                          4.77054777, 1.51736933, 0.72727580])
 
 
@@ -57,6 +57,7 @@ def test_axis_2arg():
             else:
                 assert_equal(ret.shape, data.shape[:a] + data.shape[a + 1:])
 
+
 @raises(ValueError)
 def test_bootstrap():
     """Tests whether wrong scale raises ValueError"""
@@ -64,7 +65,8 @@ def test_bootstrap():
     def testfunc(alpha, axis=None, ci=None, bootstrap_iter=100):
         return np.array(0)
 
-    testfunc(np.array([0,1,2.3,3]), ci=.8)
+    testfunc(np.array([0, 1, 2.3, 3]), ci=.8)
+
 
 @raises(ValueError)
 def test_bootstrap():
@@ -73,7 +75,8 @@ def test_bootstrap():
     def testfunc(alpha, axis=None, ci=None):
         return np.array(0)
 
-    testfunc(np.array([0,1,2.3,3]), ci=.8)
+    testfunc(np.array([0, 1, 2.3, 3]), ci=.8)
+
 
 @raises(ValueError)
 def test_bootstrap():
@@ -82,7 +85,7 @@ def test_bootstrap():
     def testfunc(alpha, bootstrap_iter=100, ci=None):
         return np.array(0)
 
-    testfunc(np.array([0,1,2.3,3]), ci=.8)
+    testfunc(np.array([0, 1, 2.3, 3]), ci=.8)
 
 
 def test_var():
@@ -140,7 +143,7 @@ def test_percentile_2d():
     s = np.random.rand(2) * 2 * np.pi
     q = pycircstat.percentile(alpha, 5, q0=s, axis=1)
     #print(q,  (s+0.05*np.pi*2) % (2*np.pi))
-    assert_allclose(q,  (s + 0.05 * np.pi * 2) %
+    assert_allclose(q, (s + 0.05 * np.pi * 2) %
                     (2 * np.pi), atol=0.001, rtol=0.001)
 
 
@@ -149,7 +152,7 @@ def test_percentile_2d_2q():
     s = np.random.rand(2) * 2 * np.pi
     q = pycircstat.percentile(alpha, [5, 10], q0=s, axis=1)
     #print(q, s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)
-    assert_allclose(q,  (s[None, :] + np.array([[0.05, 0.1]]).T * np.pi * 2)
+    assert_allclose(q, (s[None, :] + np.array([[0.05, 0.1]]).T * np.pi * 2)
                     % (2 * np.pi), atol=0.001, rtol=0.001)
 
 
@@ -271,6 +274,7 @@ def test_mean_ci_2d_warning():
 
     assert_raises(UserWarning, pycircstat.mean, data, ci=0.95, axis=0)
 
+
 def test_mean_ci_2d():
     data = np.array([
                     [0.58429, 0.88333],
@@ -284,7 +288,8 @@ def test_mean_ci_2d():
     mu = np.array([1.6537, 1.7998])
 
     try:
-        mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(data, ci=0.95, axis=0)
+        mu_tmp, (muminus_tmp, muplus_tmp) = pycircstat.mean(
+            data, ci=0.95, axis=0)
         assert_allclose(muplus, muplus_tmp, rtol=1e-4)
         assert_allclose(muminus, muminus_tmp, rtol=1e-4)
         assert_allclose(mu, mu_tmp, rtol=1e-4)
@@ -354,6 +359,7 @@ def test_moment_basic():
     mp = pycircstat.moment(data)
     assert_allclose(mp, 0.074229066428146 + 0.333420553996661j, rtol=1e-6)
 
+
 def test_kurtosis_basic():
     """ circ.kurtosis: test basic call... """
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
@@ -363,8 +369,6 @@ def test_kurtosis_basic():
     assert_allclose(mp, 0.55260, rtol=1e-5)
 
 
-
-
 def test_moment_center():
     """ circ.moment: test that the centering argument works... """
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
@@ -372,7 +376,6 @@ def test_moment_center():
                      4.77054777, 1.51736933, 0.72727580])
     mp = pycircstat.moment(data, cent=True)
     assert_allclose(mp, 3.415834014267002e-01, rtol=1e-7)
-
 
 
 def test_moment_second_order():
@@ -398,6 +401,7 @@ def test_moment_2d_data_axis0():
     assert_allclose(mp, [-0.046239398678727 + 0.556490077122954j,
                          -0.169610962142131 + 0.727602093024094j], rtol=1e-7)
 
+
 def test_moment_2d_data_axisNone():
     """circ.moment: test 2D data (axis=0)..."""
     data = np.array([
@@ -408,7 +412,8 @@ def test_moment_2d_data_axisNone():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.moment(data)
-    assert_allclose(mp, -0.10793 + 0.64205*1j, rtol=1e-5)
+    assert_allclose(mp, -0.10793 + 0.64205 * 1j, rtol=1e-5)
+
 
 def test_kurtosis_2d_data_axis0():
     """circ.kurtosis: test 2D data (axis=0)..."""
@@ -422,6 +427,7 @@ def test_kurtosis_2d_data_axis0():
     mp = pycircstat.kurtosis(data, axis=0)
     assert_allclose(mp, [-0.24688, 0.24924], rtol=1e-4)
 
+
 def test_kurtosis_2d_data_axisNone():
     """circ.kurtosis: test 2D data (axis=0)..."""
     data = np.array([
@@ -433,6 +439,7 @@ def test_kurtosis_2d_data_axisNone():
                     ])
     mp = pycircstat.kurtosis(data)
     assert_allclose(mp, -0.013320, rtol=1e-4)
+
 
 def test_kurtosis_2d_data_axisNone_fiser():
     data = np.array([
@@ -458,6 +465,7 @@ def test_kurtosis_2d_data_axisNone_bootstrap():
     mp, (low, high) = pycircstat.kurtosis(data, ci=0.95)
     assert_allclose(mp, -0.013320, rtol=1e-4)
 
+
 def test_kurtosis_2d_data_axisNone_bootstrap_kw():
     "basically only test whether boostrapping does not throw an error"
     data = np.array([
@@ -480,7 +488,10 @@ def test_kurtosis_2d_data_axis1():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.kurtosis(data, axis=1)
-    assert_allclose(mp,  [0.95562, 0.47166, 0.98155, 0.91244, 0.11831], rtol=1e-4)
+    assert_allclose(
+        mp, [
+            0.95562, 0.47166, 0.98155, 0.91244, 0.11831], rtol=1e-4)
+
 
 def test_kurtosis_2d_data_axis0_fisher():
     data = np.array([
@@ -491,7 +502,8 @@ def test_kurtosis_2d_data_axis0_fisher():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.kurtosis(data, axis=0, mode='fisher')
-    assert_allclose(mp,  [-1.76462, -0.97441], rtol=1e-4)
+    assert_allclose(mp, [-1.76462, -0.97441], rtol=1e-4)
+
 
 def test_moment_2d_data_axis1():
     """circ.moment: test 2D data (axis=1)..."""
@@ -539,6 +551,7 @@ def test_moment_7():
     # not sure of a good way to do tests for bootstraps.
 #---------------------
 
+
 def test_skewness_basic():
     """ circ.skewness: test basic call... """
     data = np.array([1.80044838, 2.02938314, 1.03534016, 4.84225057,
@@ -560,6 +573,7 @@ def test_skewness_2d_data_axis0():
     mp = pycircstat.skewness(data, axis=0)
     assert_allclose(mp, [-0.29339, -0.14716], rtol=1e-4)
 
+
 def test_skewness_2d_data_axisNone():
     """circ.skewness: test 2D data (axis=0)..."""
     data = np.array([
@@ -571,6 +585,7 @@ def test_skewness_2d_data_axisNone():
                     ])
     mp = pycircstat.skewness(data)
     assert_allclose(mp, -0.18157, rtol=1e-4)
+
 
 def test_skewness_2d_data_axisNone_fiser():
     data = np.array([
@@ -606,7 +621,9 @@ def test_skewness_2d_data_axis1():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.skewness(data, axis=1)
-    assert_allclose(mp,  [-8.3267e-17, 0.0000e+00, -1.3878e-17, 1.3878e-16, 0.0000e+00], atol=1e-4)
+    assert_allclose(
+        mp, [-8.3267e-17, 0.0000e+00, -1.3878e-17, 1.3878e-16, 0.0000e+00], atol=1e-4)
+
 
 def test_skewness_2d_data_axis0_fisher():
     data = np.array([
@@ -617,8 +634,8 @@ def test_skewness_2d_data_axis0_fisher():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.skewness(data, axis=0, mode='fisher')
-    assert_allclose(mp,  [0.84723, 1.90452], rtol=1e-4)
+    assert_allclose(mp, [0.84723, 1.90452], rtol=1e-4)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
     test_median_ci()
