@@ -8,3 +8,4 @@ from .tests import *
 from .utils import *
 from . import distributions
 from . import data
+from . import machine_learning

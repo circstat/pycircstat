@@ -26,6 +26,7 @@ Contents:
    descriptive.rst
    tests.rst
    distributions.rst
+   MachineLearning.rst
    iterators.rst
    decorators.rst
    event_series.rst
