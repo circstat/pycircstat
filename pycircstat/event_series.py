@@ -1,5 +1,8 @@
+import itertools
 import numpy as np
 from scipy import stats
+import multiprocessing
+from pycircstat import var
 
 
 def convolve_dirac_gauss(t, trial, sigma=1.):
@@ -67,3 +70,18 @@ def vector_strength_spectrum(event_times, sampling_rate, time=None):
     a[w == 0] = np.NaN
     gf = np.exp(-2 * np.pi**2 * sigma**2 * w**2)
     return w, a / gf
+
+def _vector_strength(param):
+    event_times, w = param
+    return 1-var( (event_times % (1./w) )*w*2*np.pi )
+
+def direct_vector_strength_spectrum(event_times, frequencies, parallel=None):
+
+    if parallel is None:
+        ret = np.asarray([1-var( (event_times % (1./w) )*w*2*np.pi ) for w in frequencies])
+    else:
+        p = multiprocessing.Pool(parallel)
+        ret = np.asarray(p.map(_vector_strength, itertools.product([event_times], frequencies),
+              chunksize=int(len(frequencies)/parallel)))
+
+    return ret
