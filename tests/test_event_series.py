@@ -55,5 +55,5 @@ def test_direct_vector_strength_spectrum_parallel():
     lowcut, highcut = 1, 1400
     idx = (w >= lowcut) & (w <= highcut)
     vs_2 = es.direct_vector_strength_spectrum(s, w[idx])
-    assert_allclose(vs_2, vs_spec[idx])
+    assert_allclose(vs_2, vs_spec[idx], rtol=1e-4, atol=1e-4)
 
