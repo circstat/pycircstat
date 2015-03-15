@@ -4,7 +4,7 @@ import numpy as np
 
 from numpy.testing import assert_allclose
 from nose.tools import assert_equal, assert_true
-from pycircstat.regression import CircularLinearRegression
+from pycircstat.regression import CircularLinearRegression, CircularCircularRegression
 
 
 def test_circlinregression():
@@ -52,3 +52,12 @@ def test_circlin_test():
     assert_true(res.ix['Liddell-Ord','p'] > 0.0001, 'p-value is smaller than 0.0001')
 
 
+
+def test_circcirc_regression():
+    alpha = np.random.rand(1000)*np.pi*2
+    beta = np.cos(alpha + np.random.rand()*2*np.pi)*np.pi
+    reg = CircularCircularRegression(degree=10)
+    reg.train(alpha, beta)
+    beta2 = reg(alpha)
+
+    assert_allclose(beta,beta2,err_msg="predictions do not match", atol=1e-4, rtol=1e-4)

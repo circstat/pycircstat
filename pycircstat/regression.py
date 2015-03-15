@@ -148,3 +148,27 @@ class CircularLinearRegression(BaseRegressor):
             dof = [None, (2, n-3)]
         )).set_index('test')
         return df
+
+class CircularCircularRegression(BaseRegressor):
+    """
+
+
+    :param degree:
+    """
+
+    def __init__(self, degree=3):
+        super(CircularCircularRegression, self).__init__()
+        self.degree = degree
+
+    def train(self, alpha, beta):
+        X = np.vstack([np.ones_like(alpha)] + [np.cos(alpha*k) for k in np.arange(1., self.degree+1)] \
+                                  + [np.sin(alpha*k) for k in np.arange(1., self.degree+1)]).T
+        self._coef = np.c_[np.dot(np.linalg.pinv(X), np.cos(beta)),
+                           np.dot(np.linalg.pinv(X), np.sin(beta))]
+
+    def predict(self, alpha):
+        X = np.vstack([np.ones_like(alpha)] + [np.cos(alpha*k) for k in np.arange(1., self.degree+1)] \
+                                  + [np.sin(alpha*k) for k in np.arange(1., self.degree+1)]).T
+        beta = np.dot(X, self._coef)
+        return np.arctan2(beta[:,1], beta[:,0])
+
