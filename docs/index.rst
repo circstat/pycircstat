@@ -26,10 +26,11 @@ Contents:
    descriptive.rst
    tests.rst
    distributions.rst
-   MachineLearning.rst
+   clustering.rst
+   regression.rst
+   event_series.rst
    iterators.rst
    decorators.rst
-   event_series.rst
 
 Disclaimer:
 ===========

@@ -13,7 +13,7 @@ def test_clustering():
                     4.00392159, 2.76326071, 4.52222361, 4.05978276])
     # x = np.asarray([6.10599459, 0.14824723, 3.11272268, 3.45703846, 5.88211171])
 
-    cl = pycircstat.machine_learning.AggCluster1D(numclust=4)
+    cl = pycircstat.clustering.AggCluster1D(numclust=4)
     _, ids = cl.train(x)
 
     assert_allclose(sorted(cl.centroids), sorted([6.139414042024, 2.937991695000, 3.497320320000, 4.193866918144]),

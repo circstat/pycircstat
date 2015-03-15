@@ -1,7 +1,7 @@
 Machine Learning
 ================
 
-.. automodule:: pycircstat.machine_learning
+.. automodule:: pycircstat.clustering
     :members:
     :inherited-members:
 

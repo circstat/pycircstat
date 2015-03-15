@@ -8,4 +8,5 @@ from .tests import *
 from .utils import *
 from . import distributions
 from . import data
-from . import machine_learning
+from . import clustering
+from . import event_series

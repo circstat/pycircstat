@@ -1,7 +1,6 @@
 import itertools
 import numpy as np
 from scipy import stats
-import multiprocessing
 from pycircstat import var
 
 
@@ -75,13 +74,14 @@ def _vector_strength(param):
     event_times, w = param
     return 1-var( (event_times % (1./w) )*w*2*np.pi )
 
-def direct_vector_strength_spectrum(event_times, frequencies, parallel=None):
+def direct_vector_strength_spectrum(event_times, frequencies):
+    """
+    Computes the direct vector strength spectrum for the given frequencies.
 
-    if parallel is None:
-        ret = np.asarray([1-var( (event_times % (1./w) )*w*2*np.pi ) for w in frequencies])
-    else:
-        p = multiprocessing.Pool(parallel)
-        ret = np.asarray(p.map(_vector_strength, itertools.product([event_times], frequencies),
-              chunksize=int(len(frequencies)/parallel)))
+    :param event_times: event times in seconds
+    :param frequencies: locking frequencies in Hz
+    :return: vector strength spectrum
+    """
+    ret = np.asarray([1-var( (event_times % (1./w) )*w*2*np.pi ) for w in frequencies])
 
     return ret
