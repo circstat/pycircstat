@@ -4,7 +4,7 @@ import numpy as np
 
 from numpy.testing import assert_allclose
 from nose.tools import assert_equal, assert_true
-from pycircstat.regression import CircularLinearRegression, CircularCircularRegression
+from pycircstat.regression import CL1stOrderRegression, CCTrigonometricPolynomialRegression
 
 
 def test_circlinregression():
@@ -15,7 +15,7 @@ def test_circlinregression():
 
     x = m0 + A0*np.cos(alpha - a0)
 
-    reg = CircularLinearRegression()
+    reg = CL1stOrderRegression()
     reg.train(alpha, x)
     m = reg._coef[-1]
     a = np.arctan2(reg._coef[1], reg._coef[0]) % (2*np.pi)
@@ -35,7 +35,7 @@ def test_circlin_prediction():
 
     x = m0 + A0*np.cos(alpha - a0)
 
-    reg = CircularLinearRegression()
+    reg = CL1stOrderRegression()
     reg.train(alpha, x)
 
     x2 = reg(alpha)
@@ -47,7 +47,7 @@ def test_circlin_test():
     alpha = np.random.rand(200)*np.pi*2
     x = np.random.randn(200)
 
-    reg = CircularLinearRegression()
+    reg = CL1stOrderRegression()
     res = reg.test(alpha, x)
     assert_true(res.ix['Liddell-Ord','p'] > 0.0001, 'p-value is smaller than 0.0001')
 
@@ -56,7 +56,7 @@ def test_circlin_test():
 def test_circcirc_regression():
     alpha = np.random.rand(1000)*np.pi*2
     beta = np.cos(alpha + np.random.rand()*2*np.pi)*np.pi
-    reg = CircularCircularRegression(degree=10)
+    reg = CCTrigonometricPolynomialRegression(degree=10)
     reg.train(alpha, beta)
     beta2 = reg(alpha)
 

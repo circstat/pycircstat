@@ -32,9 +32,6 @@ class BaseRegressor(object):
     def test(self, *args, **kwargs):
         raise NotImplementedError(u"{0:s}.test not implemented".format(self.__class__.__name__))
 
-    def plot(self, *args, **kwargs):
-        raise NotImplementedError(u"{0:s}.plot not implemented".format(self.__class__.__name__))
-
 
     def loss(self, x, y, lossfunc, ci=None, bootstrap_iter=1000):
         """
@@ -72,7 +69,7 @@ class BaseRegressor(object):
         return self.predict(*args, **kwargs)
 
 
-class CircularLinearRegression(BaseRegressor):
+class CL1stOrderRegression(BaseRegressor):
     """
     Implements a circular linear regression model of the form
 
@@ -82,14 +79,14 @@ class CircularLinearRegression(BaseRegressor):
     The actual model is equivalently implemented as
 
     .. math::
-        x = m + c_1 \\cos(\\alpha) + c_2 \\cos(\\alpha)
+        x = c_1 \\cos(\\alpha) + c_2 \\sin(\\alpha) + m
 
     References: [Jammalamadaka2001]_
 
     """
 
     def __init__(self):
-        super(CircularLinearRegression, self).__init__()
+        super(CL1stOrderRegression, self).__init__()
 
     def train(self, alpha, x):
         """
@@ -149,24 +146,47 @@ class CircularLinearRegression(BaseRegressor):
         )).set_index('test')
         return df
 
-class CircularCircularRegression(BaseRegressor):
+class CCTrigonometricPolynomialRegression(BaseRegressor):
     """
+    Implements a circular circular regression model of the form
+
+    .. math::
+        \\cos(\\beta) = a_0 + \\sum_{k=1}^d a_k \\cos(k\\alpha) + b_k \\sin(k\\alpha)
+
+        \\sin(\\beta) = c_0 + \\sum_{k=1}^d c_k \\cos(k\\alpha) + d_k \\sin(k\\alpha)
+
+    The angles :math:`\\beta` are estimated via :math:`\\hat\\beta = atan2(\\sin(\\beta), \\cos(\\beta))`
 
 
-    :param degree:
+
+    :param degree: degree d of the trigonometric polynomials
+
+    References: [Jammalamadaka2001]_
     """
 
     def __init__(self, degree=3):
-        super(CircularCircularRegression, self).__init__()
+        super(CCTrigonometricPolynomialRegression, self).__init__()
         self.degree = degree
 
     def train(self, alpha, beta):
+        """
+        Estimates the regression coefficients. Only works for 1D data.
+
+        :param alpha: independent variable, angles in radians
+        :param beta: dependent variable, angles in radians
+        """
         X = np.vstack([np.ones_like(alpha)] + [np.cos(alpha*k) for k in np.arange(1., self.degree+1)] \
                                   + [np.sin(alpha*k) for k in np.arange(1., self.degree+1)]).T
         self._coef = np.c_[np.dot(np.linalg.pinv(X), np.cos(beta)),
                            np.dot(np.linalg.pinv(X), np.sin(beta))]
 
     def predict(self, alpha):
+        """
+        Predicts linear values from the angles.
+
+        :param alpha: inputs, angles in radians
+        :return: predictions, angles in radians
+        """
         X = np.vstack([np.ones_like(alpha)] + [np.cos(alpha*k) for k in np.arange(1., self.degree+1)] \
                                   + [np.sin(alpha*k) for k in np.arange(1., self.degree+1)]).T
         beta = np.dot(X, self._coef)
