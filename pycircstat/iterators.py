@@ -1,5 +1,27 @@
 import numpy as np
 
+def simple_bootstrap(data, iterations):
+    """
+    Generator to perform iterations bootstrap iterations along the first axis.
+
+    :param data: data
+    :param iterations: iterations
+    """
+    m = data.shape[0]
+    for _ in range(iterations):
+        yield data[np.random.randint(0,m,m)]
+
+def index_bootstrap(m, iterations):
+    """
+    Generator to perform iterations bootstrap selections among m elements. Returns indices.
+
+    :param data: data
+    :param iterations: iterations
+    """
+
+    for _ in range(iterations):
+        yield np.random.randint(0,m,m, dtype=int)
+
 
 def nd_bootstrap(data, iterations, axis=None, strip_tuple_if_one=True):
     """

@@ -1,5 +1,7 @@
+import itertools
 import numpy as np
 from scipy import stats
+from pycircstat import var
 
 
 def convolve_dirac_gauss(t, trial, sigma=1.):
@@ -67,3 +69,19 @@ def vector_strength_spectrum(event_times, sampling_rate, time=None):
     a[w == 0] = np.NaN
     gf = np.exp(-2 * np.pi**2 * sigma**2 * w**2)
     return w, a / gf
+
+def _vector_strength(param):
+    event_times, w = param
+    return 1-var( (event_times % (1./w) )*w*2*np.pi )
+
+def direct_vector_strength_spectrum(event_times, frequencies):
+    """
+    Computes the direct vector strength spectrum for the given frequencies.
+
+    :param event_times: event times in seconds
+    :param frequencies: locking frequencies in Hz
+    :return: vector strength spectrum
+    """
+    ret = np.asarray([1-var( (event_times % (1./w) )*w*2*np.pi ) for w in frequencies])
+
+    return ret

@@ -30,3 +30,30 @@ def test_vector_strength_spectrum():
         F0.append(f0)
         R.append(rho)
     assert_allclose(R, vs_spec[idx])
+
+def test_direct_vector_strength_spectrum():
+    T = 3  # 2s
+    sampling_rate = 10000.
+    firing_rate = 10  # 1000Hz
+
+    s = T * np.random.rand(np.random.poisson(firing_rate * T))
+
+    w, vs_spec = es.vector_strength_spectrum(s, sampling_rate)
+    lowcut, highcut = 500, 550
+    idx = (w >= lowcut) & (w <= highcut)
+    vs_2 = es.direct_vector_strength_spectrum(s, w[idx])
+    assert_allclose(vs_2, vs_spec[idx])
+
+def test_direct_vector_strength_spectrum_parallel():
+    T = 3  # 2s
+    sampling_rate = 10000.
+    firing_rate = 10  # 1000Hz
+
+    s = T * np.random.rand(np.random.poisson(firing_rate * T))
+
+    w, vs_spec = es.vector_strength_spectrum(s, sampling_rate)
+    lowcut, highcut = 1, 1400
+    idx = (w >= lowcut) & (w <= highcut)
+    vs_2 = es.direct_vector_strength_spectrum(s, w[idx])
+    assert_allclose(vs_2, vs_spec[idx], rtol=1e-4, atol=1e-4)
+
