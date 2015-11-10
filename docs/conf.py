@@ -13,7 +13,6 @@
 # serve to show the default.
 
 import sys
-import os
 import mock
 import os
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
