@@ -17,7 +17,11 @@ Team: Philipp Berens, Fabian Sinz, Tom Wallis, Matthias Kümmerer and Matthias B
 Installation
 ------------
 
-The package can be installed as usual with
+The package can be installed via pip (`pip` might need to be replaced by `pip3`)
+
+    sudo pip install pycircstat
+    
+You can also install it via
 
     python setup.py install
 
