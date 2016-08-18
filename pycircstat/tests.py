@@ -504,13 +504,14 @@ def _kuiper_lookup(n, k):
     if np.any(isin):
         row = np.where(isin)[0]
     else:
-        row = len(nn) - np.sum(n < nn)
-    if row == 0:
-        raise ValueError('N too small.')
-    else:
-        warnings.warn(
-            'N=%d not found in table, using closest N=%d present.' %
-            (n, nn[row]))
+        row = len(nn) - np.sum(n < nn) - 1
+
+        if row == 0:
+            raise ValueError('N too small.')
+        else:
+            warnings.warn(
+                'N=%d not found in table, using closest N=%d present.' %
+                (n, nn[row]))
 
     idx = (ktable[row, 1:] < k).squeeze()
     if np.any(idx):
