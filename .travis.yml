@@ -20,8 +20,8 @@ before_install:
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
   - conda config --set always_yes yes --set changeps1 no
+  - conda update --no-deps conda
   - conda info -a
-  - conda update conda
   # Useful for debugging any issues with conda
 install:
   # Replace dep1 dep2 ... with your dependencies
