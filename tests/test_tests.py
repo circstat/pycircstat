@@ -243,34 +243,17 @@ def test_sample_cdf():
 
 
 def test_kuiper_warning():
-    alpha1 = np.asarray([0.291662278945,
-                         5.899415544666,
-                         5.402236718096,
-                         3.728212505263,
-                         5.303188109786,
-                         3.737946900082,
-                         3.850015526787,
-                         4.902154536516,
-                         3.631621444982,
-                         5.341562525096])
-    alpha2 = np.asarray([0.613650458799,
-                         2.109660249330,
-                         3.617555161298,
-                         6.196794760548,
-                         1.856071575830,
-                         2.991480015107,
-                         1.789200626487,
-                         4.835921843822,
-                         2.767491245457,
-                         1.744565591973])
-    p0 = 0.1
-    k0 = 70
+    unknown_N = 26
+    alpha1 = np.random.rand(unknown_N)*2.*np.pi
+    alpha2 = np.random.rand(unknown_N)*2.*np.pi
+
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
         p, k = pycircstat.kuiper(alpha1, alpha2)
+
         assert len(w) == 1
         assert issubclass(w[-1].category, UserWarning)
-        assert "N=10 not found in table" in str(w[-1].message)
+        assert "N=%d not found in table" % unknown_N in str(w[-1].message)
 
 
 def test_kuiper():
@@ -307,6 +290,49 @@ def test_kuiper():
         rtol=1e-4,
         atol=1e-4,
         err_msg="Error in statistic k.")
+
+
+def test_kuiper_anglerange():
+    alpha1 = np.asarray([0.291662278945,
+                         5.899415544666,
+                         5.402236718096,
+                         3.728212505263,
+                         5.303188109786,
+                         3.737946900082,
+                         3.850015526787,
+                         4.902154536516,
+                         3.631621444982,
+                         5.341562525096])
+    alpha2 = np.asarray([0.613650458799,
+                         2.109660249330,
+                         3.617555161298,
+                         6.196794760548,
+                         1.856071575830,
+                         2.991480015107,
+                         1.789200626487,
+                         4.835921843822,
+                         2.767491245457,
+                         1.744565591973])
+    alpha1b = alpha1 - np.pi
+    alpha2b = alpha2 - np.pi
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        p, k = pycircstat.kuiper(alpha1, alpha2)
+        pb, kb = pycircstat.kuiper(alpha1b, alpha2b)
+
+    assert_allclose(p,
+                    pb,
+                    rtol=1e-4,
+                    atol=1e-4,
+                    err_msg="P-values are not equal"
+                    )
+    assert_allclose(k,
+                    kb,
+                    rtol=1e-4,
+                    atol=1e-4,
+                    err_msg="K statistics not equal"
+                    )
 
 
 def test_kuiper2():
@@ -504,4 +530,3 @@ def test_hktest_large_kk():
     assert_allclose(t.ix['Residual','MS'], 0.06760532,rtol=1e-4, atol=1e-4)
 
     assert_allclose(t.ix['Total','SS'], 5.616433,rtol=1e-4, atol=1e-4)
-
