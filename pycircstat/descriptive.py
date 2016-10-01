@@ -153,6 +153,10 @@ def median(alpha, axis=None, ci=None, bootstrap_iter=None):
     return med
 
 
+def center_angle(angle):
+    return (angle + np.pi) % (2*np.pi) - np.pi
+
+
 def cdiff(alpha, beta):
     """
     Difference between pairs :math:`x_i-y_i` around the circle,
@@ -162,7 +166,7 @@ def cdiff(alpha, beta):
     :param beta:   sample of circular random variable
     :return: distance between the pairs
     """
-    return np.angle(np.exp(1j * alpha) / np.exp(1j * beta))
+    return center_angle(alpha - beta)
 
 
 def pairwise_cdiff(alpha, beta=None):
@@ -186,8 +190,7 @@ def pairwise_cdiff(alpha, beta=None):
     reshaper_beta = len(alpha.shape) * (np.newaxis,) + \
         len(beta.shape) * (slice(None, None),)
 
-    return np.angle(np.exp(1j * alpha[reshaper_alpha]) /
-                    np.exp(1j * beta[reshaper_beta]))
+    return center_angle(alpha[reshaper_alpha] - beta[reshaper_beta])
 
 
 @mod2pi
