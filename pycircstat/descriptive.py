@@ -565,8 +565,9 @@ def axial(alpha, p=1):
 
 
 def _corr(x, y, axis=0):
-    np.sum((x - x.mean(axis=axis, keepdims=True))  * (y - y.mean(axis=axis, keepdims=True)), axis=axis) \
-    / np.std(x, axis=axis) / np.std(y, axis=axis) / x.shape[axis]
+    return np.sum((x - x.mean(axis=axis, keepdims=True))  * \
+                  (y - y.mean(axis=axis, keepdims=True)), axis=axis) \
+            / np.std(x, axis=axis) / np.std(y, axis=axis) / x.shape[axis]
 
 
 @bootstrap(1, 'linear')
