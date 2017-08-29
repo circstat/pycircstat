@@ -347,7 +347,7 @@ def test_corrcc_ci_2d():
 def test_corrcl():
     data1 = np.random.rand(50000) * 2 * np.pi
     data2 = np.random.randn(50000)
-    assert_allclose(pycircstat.corrcc(data1, data2),
+    assert_allclose(pycircstat.corrcl(data1, data2),
                     0., rtol=3 * 1e-2, atol=3 * 1e-2)
 
 
