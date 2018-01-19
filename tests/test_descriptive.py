@@ -587,7 +587,7 @@ def test_skewness_2d_data_axisNone():
     assert_allclose(mp, -0.18157, rtol=1e-4)
 
 
-def test_skewness_2d_data_axisNone_fiser():
+def test_skewness_2d_data_axisNone_fisher():
     data = np.array([
                     [0.58429, 0.88333],
                     [1.14892, 2.22854],
@@ -596,7 +596,7 @@ def test_skewness_2d_data_axisNone_fiser():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.skewness(data, mode='fisher')
-    assert_allclose(mp, 0.81132, rtol=1e-4)
+    assert_allclose(mp, -0.88086, rtol=1e-4)
 
 
 def test_skewness_2d_data_axisNone_bootstrap():
@@ -634,5 +634,5 @@ def test_skewness_2d_data_axis0_fisher():
                     [2.96969, 1.51748],
                     ])
     mp = pycircstat.skewness(data, axis=0, mode='fisher')
-    assert_allclose(mp, [0.84723, 1.90452], rtol=1e-4)
+    assert_allclose(mp, [-0.999794, -1.157187], rtol=1e-4)
 
