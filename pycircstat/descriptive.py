@@ -596,7 +596,7 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
     # compute correlation coefficient for sin and cos independently
     rxs = _corr(x, np.sin(alpha), axis=axis)
     rxc = _corr(x, np.cos(alpha), axis=axis)
-    rcs = _corr(np.sin(alpha), np.cos(alpha))
+    rcs = _corr(np.sin(alpha), np.cos(alpha), axis=axis)
 
     # compute angular-linear correlation (equ. 27.47)
     return np.sqrt(
