@@ -332,7 +332,7 @@ def symtest(alpha, axis=None):
 
     if axis is not None:
         oshape = d.shape[1:]
-        d2 = d.reshape((d.shape[0], np.prod(d.shape[1:])))
+        d2 = d.reshape((d.shape[0], int(np.prod(d.shape[1:]))))
         T, pval = map(lambda x: np.asarray(x).reshape(
             oshape), zip(*[stats.wilcoxon(dd) for dd in d2.T]))
     else:

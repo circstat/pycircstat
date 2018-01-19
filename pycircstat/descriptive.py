@@ -596,7 +596,7 @@ def corrcl(alpha, x, axis=None, ci=None, bootstrap_iter=None):
     # compute correlation coefficient for sin and cos independently
     rxs = _corr(x, np.sin(alpha), axis=axis)
     rxc = _corr(x, np.cos(alpha), axis=axis)
-    rcs = _corr(np.sin(alpha), np.cos(alpha))
+    rcs = _corr(np.sin(alpha), np.cos(alpha), axis=axis)
 
     # compute angular-linear correlation (equ. 27.47)
     return np.sqrt(
@@ -779,7 +779,7 @@ def skewness(
         return np.sum(
             w * np.sin(2 * cdiff(alpha, theta2)), axis=axis) / np.sum(w, axis=axis)
     elif mode == 'fisher':
-        mom = moment(alpha, p=2, w=w, axis=axis, cent=True)
+        mom = moment(alpha, p=2, w=w, axis=axis, cent=False)
         mu2, rho2 = np.angle(mom), np.abs(mom)
         R = resultant_vector_length(alpha, w=w, axis=axis)
         return rho2 * np.sin(cdiff(mu2, 2 * theta)) / \
