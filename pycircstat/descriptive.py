@@ -779,7 +779,7 @@ def skewness(
         return np.sum(
             w * np.sin(2 * cdiff(alpha, theta2)), axis=axis) / np.sum(w, axis=axis)
     elif mode == 'fisher':
-        mom = moment(alpha, p=2, w=w, axis=axis, cent=True)
+        mom = moment(alpha, p=2, w=w, axis=axis, cent=False)
         mu2, rho2 = np.angle(mom), np.abs(mom)
         R = resultant_vector_length(alpha, w=w, axis=axis)
         return rho2 * np.sin(cdiff(mu2, 2 * theta)) / \
