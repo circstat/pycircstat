@@ -6,7 +6,6 @@ import warnings
 from nose.tools import nottest
 
 import numpy as np
-from scipy import misc
 from scipy import stats
 # import warnings
 from . import descriptive, swap2zeroaxis
@@ -120,7 +119,7 @@ def omnibus(alpha, w=None, sz=np.radians(1), axis=None):
 
     if np.any(~idx50):
         pval[~idx50] = 2 ** (1 - n[~idx50]) * (n[~idx50] - \
-                                               2 * m[~idx50]) * misc.comb(n[~idx50], m[~idx50])
+                                               2 * m[~idx50]) * special.comb(n[~idx50], m[~idx50])
 
     return pval.squeeze(), m
 
