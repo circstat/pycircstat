@@ -17,5 +17,5 @@ setup(
         "Topic :: Utilities",
         # "License :: OSI Approved :: MIT License",
     ],
-    setup_requires=['nose>=1.0', 'mock', 'sphinx_rtd_theme', "decorator", "pandas", "scipy"],
+    install_requires=['nose>=1.0', 'mock', 'sphinx_rtd_theme', "decorator", "pandas", "scipy"],
 )
