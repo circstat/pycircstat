@@ -49,7 +49,7 @@ def test_circlin_test():
 
     reg = CL1stOrderRegression()
     res = reg.test(alpha, x)
-    assert_true(res.ix['Liddell-Ord','p'] > 0.0001, 'p-value is smaller than 0.0001')
+    assert_true(res.loc['Liddell-Ord','p'] > 0.0001, 'p-value is smaller than 0.0001')
 
 
 
