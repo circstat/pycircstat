@@ -121,7 +121,7 @@ def test_astd():
 
 
 def test_percentile():
-    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)
+    alpha = np.linspace(0, 2 * np.pi, int(1. / 0.0001))
     s = np.random.rand() * 2 * np.pi
     q = pycircstat.percentile(alpha, 5, q0=s)
     #print(q, s+0.05*np.pi*2)
@@ -130,7 +130,7 @@ def test_percentile():
 
 
 def test_percentile_2q():
-    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)
+    alpha = np.linspace(0, 2 * np.pi, int(1. / 0.0001))
     s = np.random.rand() * 2 * np.pi
     q = pycircstat.percentile(alpha, [5, 10], q0=s)
     #print(q, s+np.array([0.05,0.1])*np.pi*2)
@@ -139,7 +139,7 @@ def test_percentile_2q():
 
 
 def test_percentile_2d():
-    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)[None, :] * np.ones((2, 1))
+    alpha = np.linspace(0, 2 * np.pi, int(1. / 0.0001))[None, :] * np.ones((2, 1))
     s = np.random.rand(2) * 2 * np.pi
     q = pycircstat.percentile(alpha, 5, q0=s, axis=1)
     #print(q,  (s+0.05*np.pi*2) % (2*np.pi))
@@ -148,7 +148,7 @@ def test_percentile_2d():
 
 
 def test_percentile_2d_2q():
-    alpha = np.linspace(0, 2 * np.pi, 1. / 0.0001)[None, :] * np.ones((2, 1))
+    alpha = np.linspace(0, 2 * np.pi, int(1. / 0.0001))[None, :] * np.ones((2, 1))
     s = np.random.rand(2) * 2 * np.pi
     q = pycircstat.percentile(alpha, [5, 10], q0=s, axis=1)
     #print(q, s[None,:]+np.array([[0.05,0.1]]).T*np.pi*2)
