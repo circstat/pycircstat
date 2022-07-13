@@ -1,6 +1,8 @@
 from __future__ import absolute_import
 
 from functools import wraps
+from inspect import getfullargspec
+import sys
 import numpy as np
 from . import CI
 from decorator import decorator
@@ -36,7 +38,10 @@ def mod2pi(f):
 
 
 def get_var(f, varnames, args, kwargs):
-    fvarnames = f.__code__.co_varnames
+    if sys.version_info[0] > 2:
+        fvarnames = getfullargspec(f).args
+    else:
+        fvarnames = f.__code__.co_varnames
 
     var_idx = []
     kwar_keys = []
