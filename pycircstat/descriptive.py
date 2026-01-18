@@ -5,7 +5,9 @@ from __future__ import absolute_import
 
 from functools import wraps
 import itertools
+import sys
 from decorator import decorator
+from inspect import getfullargspec
 
 import numpy as np
 from scipy import stats
@@ -34,7 +36,10 @@ class bootstrap:
         self.scale = scale
 
     def _get_var(self, f, what, default, args, kwargs, remove=False):
-        varnames = f.__code__.co_varnames
+        if sys.version_info[0] > 2:
+            varnames = getfullargspec(f).args
+        else:
+            varnames = f.__code__.co_varnames
 
         if what in varnames:
             what_idx = varnames.index(what)
